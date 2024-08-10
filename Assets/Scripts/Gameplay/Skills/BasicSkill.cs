@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +8,7 @@ public class BasicSkill : SkillAction
 {
     public float dmgMultiplier;
 
-    public override void Execute(CharacterModel skillUser, CharacterModel target)
-    {
-        ActionManager.instance.AddPlayerAction(() => target.DealDamage(skillUser.GetBaseDmg() * dmgMultiplier));
+    public override void ExecuteSkill(CharacterModel skillUser, Func<CharacterModel> target){
+        target.Invoke().DealDamage(skillUser.GetBaseDmg() * dmgMultiplier);
     }
 }

@@ -1,3 +1,4 @@
+using UnityEngine;
 namespace LlwnrEventBus{
     public interface IEvent{ }
 
@@ -7,15 +8,16 @@ namespace LlwnrEventBus{
         public int health;
         public int mana;
     }
-
     public struct WhatIsGoingOnEvent : IEvent{
         public int age;
         public string myName;
     }
-
     //When a character takes damage
     public struct OnDamageTakenEvent : IEvent{
-        public UnityEngine.Transform HitCharacter;
+        public Transform HitCharacter;
         public float DamageAmt, CurrentHealth, MaxHealth;
+    }
+    public struct OnDeathEvent : IEvent{
+        public Transform DiedCharacter;
     }
 }

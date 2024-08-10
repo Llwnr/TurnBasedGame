@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bba26efc7cec034198a02691cfbb224, type: 3}
   m_Name: DummyChar1
   m_EditorClassIdentifier: 
-  name: Dummy Character
-  description: This is a dumb character.
-  maxHealth: 100
-  speed: 5
-  mySkills:
+  Name: 
+  Description: 
+  MaxHealth: 100
+  Speed: 5
+  MySkills:
   - {fileID: 11400000, guid: b9a83265bbcd7ea419403023307cbe75, type: 2}
   - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}
   - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}

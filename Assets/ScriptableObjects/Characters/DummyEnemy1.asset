@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bba26efc7cec034198a02691cfbb224, type: 3}
   m_Name: DummyEnemy1
   m_EditorClassIdentifier: 
-  name: EnemyReal
-  description: aslkdjoqwej laksd
-  maxHealth: 100
-  speed: 8
-  mySkills:
-  - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}
+  Name: 
+  Description: 
+  MaxHealth: 50
+  Speed: 2
+  MySkills:
+  - {fileID: 11400000, guid: b9a83265bbcd7ea419403023307cbe75, type: 2}
   - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}

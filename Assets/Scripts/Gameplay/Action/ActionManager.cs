@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ActionManager : MonoBehaviour
@@ -37,9 +38,14 @@ public class ActionManager : MonoBehaviour
         }
     }
 
-    void ExecutePlayerActions(){
+    async void ExecutePlayerActions(){
         while(_playerActions.Count > 0){
             _playerActions.Dequeue().Invoke();
+            await Task.Delay(300);
+        }
+        if(_playerActions.Count <= 0){
+            await Task.Delay(1000);
+            TurnManager.instance.NextPartysTurn();
         }
     }
     void ExecuteEnemyActions(){

@@ -10,6 +10,7 @@ public static class TargetManager
             return _playerTargetModel;
         }
         set{
+            if(value == null) return;
             _playerTargetModel = value;
             OnPlayerTargetChange.Invoke(_playerTargetModel.transform);
         }
@@ -19,6 +20,7 @@ public static class TargetManager
             return _enemyTargetModel;
         }
         set{
+            if(value == null) return;
             _enemyTargetModel = value;
             OnEnemyTargetChange.Invoke(_enemyTargetModel.transform);
         }
@@ -26,15 +28,26 @@ public static class TargetManager
     public static event Action<Transform> OnPlayerTargetChange;
     public static event Action<Transform> OnEnemyTargetChange;
     public static event Action OnEmptyTargetClicked;
+    //This will manage the target to set incase the current target is already dead. So, now have to find a new target
+    public static CharacterModel GetTargetOrAvailableTarget(CharacterModel target){
+        //If the target is dead already, then find a new target
+        if(!target || !target.gameObject.activeSelf){
+            if(target is PlayerModel)   target = SelectedPlayerTarget;
+            else if(target is EnemyModel) target = SelectedEnemyTarget;
+        }
+        return target;
+    }
     
     //Let target setters to set the player targets and enemy targets
     public static void NonTargetClicked(){
         OnEmptyTargetClicked.Invoke();
     }
     public static void SetPlayerTargetModel(CharacterModel target){
+        if(target==null) return;
         SelectedPlayerTarget = target;
     }
     public static void SetEnemyTargetModel(CharacterModel target){
+        if(target==null) return;
         SelectedEnemyTarget = target;
     }
     public static PlayerModel[] GetAllPlayerModels(){

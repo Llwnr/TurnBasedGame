@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using LlwnrEventBus;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ public class HealthView : MonoBehaviour
     [SerializeField]private Image _healthBar;
     [SerializeField]bool debug;
     EventBinding<OnDamageTakenEvent> _onDamageTaken;
+    EventBinding<OnDeathEvent> _onDeathEvent;
     private void Start() {
         AlignToModelPos();
     }
@@ -21,17 +23,29 @@ public class HealthView : MonoBehaviour
     private void OnEnable() {
         _onDamageTaken = new EventBinding<OnDamageTakenEvent>(UpdateHealthBar);
         EventBus<OnDamageTakenEvent>.Register(_onDamageTaken);
+
+        _onDeathEvent = new EventBinding<OnDeathEvent>(DeactivateNextFrame);
+        EventBus<OnDeathEvent>.Register(_onDeathEvent);
     }
     private void OnDisable() {
         EventBus<OnDamageTakenEvent>.Deregister(_onDamageTaken);
+        EventBus<OnDeathEvent>.Deregister(_onDeathEvent);
     }
+
     void UpdateHealthBar(OnDamageTakenEvent eventData){
         if(eventData.HitCharacter == _myCharacter){
             _healthBar.fillAmount = eventData.CurrentHealth/eventData.MaxHealth;
-            DebugOut("Updating health bar by listening to OnDamageTakenEvent");
+            Log("Updating health bar by listening to OnDamageTakenEvent");
         }
     }
-    void DebugOut(object data){
+    async void DeactivateNextFrame(OnDeathEvent eventData){
+        await Task.Yield(); 
+        if(eventData.DiedCharacter == transform) gameObject.SetActive(false);
+    }
+
+
+
+    void Log(object data){
         if(!debug) return;
         Debug.Log(data);
     }

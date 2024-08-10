@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +14,5 @@ public class HealthManager
 
     public void DealDamage(float dmgAmt){
         CurrentHealth -= dmgAmt;
-        Debug.Log(" health: " + CurrentHealth);
     }
 }

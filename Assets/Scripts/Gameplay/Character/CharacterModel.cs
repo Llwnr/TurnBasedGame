@@ -15,21 +15,35 @@ public abstract class CharacterModel : MonoBehaviour
     }
 
     void InitializeHealthComponent(){
-        _healthManager = new HealthManager(_characterData.maxHealth);
+        _healthManager = new HealthManager(_characterData.MaxHealth);
     }
 
     //FOR SKILLS
     public List<SkillAction> GetSkills(){
-        return _characterData.mySkills;
+        return _characterData.MySkills;
     }
     public void DealDamage(float dmgAmt){
         _healthManager.DealDamage(dmgAmt);
+
         Debug.Log("Firing 'OnDamageTakenEvent'");
         EventBus<OnDamageTakenEvent>.Raise(new OnDamageTakenEvent{
             HitCharacter = transform,
             DamageAmt = dmgAmt,
             CurrentHealth = _healthManager.CurrentHealth,
             MaxHealth = _healthManager.MaxHealth,
+        });
+        //MANAGING WHEN A CHARACTER DIES
+        if(_healthManager.CurrentHealth <= 0){
+            gameObject.SetActive(false);
+            NotifyDeath();
+        }
+        
+        
+    }
+    void NotifyDeath(){
+        Debug.Log("Firing 'OnDeathEvent'");
+        EventBus<OnDeathEvent>.Raise(new OnDeathEvent{
+            DiedCharacter = transform,
         });
     }
     
@@ -38,7 +52,7 @@ public abstract class CharacterModel : MonoBehaviour
         return 1;
     }
     public float GetFinalSpeed(){
-        return _characterData.speed;
+        return _characterData.Speed;
     }
     public float GetHealth(){
         return _healthManager.CurrentHealth;

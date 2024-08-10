@@ -7,13 +7,13 @@ using UnityEngine;
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager instance;
-
     private void Awake() {
         if(instance == null) instance = this;
         else{
             Debug.LogError("More than 1 turn manager");
         }
     }
+
     Queue<CharacterPresenter> _playerTurnQueue = new Queue<CharacterPresenter>();
     CharacterPresenter _currentPresenter;
     // Start is called before the first frame update
@@ -31,12 +31,14 @@ public class TurnManager : MonoBehaviour
         foreach(var playerCharacter in myQueue){
             _playerTurnQueue.Enqueue(playerCharacter);
         }
+        
+        Debug.Log("Num of charas this round: " + _playerTurnQueue.Count);
         NextCharactersTurn();
+        
     }
 
     public void NextCharactersTurn(){
         if(_playerTurnQueue.Count <= 0){
-            NextPartysTurn();
             return;
         }
         _currentPresenter = _playerTurnQueue.Dequeue();
@@ -45,5 +47,7 @@ public class TurnManager : MonoBehaviour
 
     public void NextPartysTurn(){
         Debug.Log("Turn switched to next party");
+
+        Initialize();
     }
 }

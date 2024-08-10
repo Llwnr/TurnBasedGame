@@ -28,7 +28,8 @@ public class CharacterSkillView : MonoBehaviour
     //Set skills to execute on the button
     public void SetSkill(Button btn, SkillAction action, CharacterModel skillOwner){
         btn.onClick.AddListener(() => {
-            action.Execute(skillOwner, TargetManager.SelectedEnemyTarget);
+            CharacterModel target = TargetManager.SelectedEnemyTarget;
+            ActionManager.instance.AddPlayerAction(() => action.Execute(skillOwner, () => TargetManager.GetTargetOrAvailableTarget(target)));
             _characterPresenter.OnSkillUsed();
         });
     }

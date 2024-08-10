@@ -9,6 +9,9 @@ public class EnemyModel : CharacterModel
     }
 
     public void QueueUpSkill(){
-        _characterData.mySkills[Random.Range(0, _characterData.mySkills.Count-1)].Execute(this, TargetManager.SelectedPlayerTarget);
+        CharacterModel target = TargetManager.SelectedPlayerTarget;
+        ActionManager.instance.AddPlayerAction(() => {
+            _characterData.MySkills[Random.Range(0, _characterData.MySkills.Count)].Execute(this, () => TargetManager.GetTargetOrAvailableTarget(target));
+        });
     }
 }

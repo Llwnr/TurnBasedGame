@@ -4,13 +4,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CharacterData", menuName = "CharacterData", order = 0)]
 public class CharacterData : ScriptableObject {
     [Header("Basic Information")]
-    public new string name;
-    public string description;
+    public string Name;
+    public string Description;
 
     [Header("Core Stats")]
-    public float maxHealth;
-    public float speed;
+    public float MaxHealth;
+    public float Speed;
 
     [Header("Skills")]
-    public List<SkillAction> mySkills;
+    public List<SkillAction> MySkills;
 }
