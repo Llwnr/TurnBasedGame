@@ -20,11 +20,11 @@ public class TurnManager : MonoBehaviour
     IEnumerator Start()
     {
         yield return new WaitForEndOfFrame();
-        Initialize();
+        QueueTurn();
     }  
 
     //Create a queue at start(Players turn first)
-    void Initialize(){
+    void QueueTurn(){
         List<CharacterPresenter> myQueue = FindObjectsOfType<CharacterPresenter>().ToList();
         myQueue = myQueue.OrderByDescending(x => x.GetFinalSpeed()).ToList();
         
@@ -48,6 +48,6 @@ public class TurnManager : MonoBehaviour
     public void NextPartysTurn(){
         Debug.Log("Turn switched to next party");
 
-        Initialize();
+        QueueTurn();
     }
 }

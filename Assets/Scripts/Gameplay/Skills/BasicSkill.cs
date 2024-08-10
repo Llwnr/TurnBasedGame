@@ -8,7 +8,7 @@ public class BasicSkill : SkillAction
 {
     public float dmgMultiplier;
 
-    public override void ExecuteSkill(CharacterModel skillUser, Func<CharacterModel> target){
-        target.Invoke().DealDamage(skillUser.GetBaseDmg() * dmgMultiplier);
+    public override void ExecuteSkill(CharacterModel skillUser, CharacterModel target){
+        target.DealDamage(skillUser.GetBaseDmg() * dmgMultiplier);
     }
 }

@@ -8,10 +8,10 @@ public class BurstSkill : SkillAction
 {
     public float dmgMultiplier;
 
-    public override void ExecuteSkill(CharacterModel skillUser, Func<CharacterModel> target)
+    public override void ExecuteSkill(CharacterModel skillUser, CharacterModel target)
     {
         //THIS SKILL IS AOE SO:
-        if(target.Invoke() is PlayerModel){
+        if(target is PlayerModel){
             foreach(CharacterModel characterModel in TargetManager.GetAllPlayerModels()){
                 characterModel.DealDamage(skillUser.GetBaseDmg() * dmgMultiplier);
             }

@@ -34,15 +34,18 @@ public class Hero : MonoBehaviour {
 
     private void Update() {
         if(Input.GetKeyDown(KeyCode.T)){
+            Debug.Log("T key pressed");
             EventBus<TestEvent>.Raise(new TestEvent());
         }
         if(Input.GetKeyDown(KeyCode.Space)){
+            Debug.Log("Space key pressed");
             EventBus<PlayerEvent>.Raise(new PlayerEvent{
                 health = hp,
                 mana = man
             });
         }
         if(Input.GetKeyDown(KeyCode.X)){
+            Debug.Log("X key pressed");
             EventBus<WhatIsGoingOnEvent>.Raise(new WhatIsGoingOnEvent());
         }
     }
