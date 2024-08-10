@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "CardGameAgainYikes.sln"
+    "dotnet.defaultSolution": "TurnBasedGame.sln"
 }

@@ -17,8 +17,9 @@ public class TurnManager : MonoBehaviour
     Queue<CharacterPresenter> _playerTurnQueue = new Queue<CharacterPresenter>();
     CharacterPresenter _currentPresenter;
     // Start is called before the first frame update
-    void Start()
+    IEnumerator Start()
     {
+        yield return new WaitForEndOfFrame();
         Initialize();
     }  
 
