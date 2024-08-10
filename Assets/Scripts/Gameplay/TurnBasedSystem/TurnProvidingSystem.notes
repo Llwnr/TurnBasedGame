@@ -1,0 +1,3 @@
+Player party and enemy party
+Each hero in the party will be given their turn once, same with enemy and it cycles back and forth
+The turns in each party goes from (nearest to middle) to (furthest from middle).
