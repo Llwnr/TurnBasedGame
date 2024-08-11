@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db6d0bb6a94a3d046955e3dca93af135, type: 3}
   m_Name: BurstSkill1
   m_EditorClassIdentifier: 
-  dmgMultiplier: 25
+  SelfStatusEffects: []
+  EnemyStatusEffects: []
+  dmgMultiplier: 3

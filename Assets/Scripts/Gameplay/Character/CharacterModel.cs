@@ -7,6 +7,7 @@ using LlwnrEventBus;
 public abstract class CharacterModel : MonoBehaviour
 {
     [SerializeField]protected CharacterData _characterData;
+    [SerializeField]protected StatusEffectManager _statusEffectManager;
     //For Health Management
     private HealthManager _healthManager;
 
@@ -28,6 +29,7 @@ public abstract class CharacterModel : MonoBehaviour
         Debug.Log("Firing 'OnDamageTakenEvent'");
         EventBus<OnDamageTakenEvent>.Raise(new OnDamageTakenEvent{
             HitCharacter = transform,
+            CharacterModel = this,
             DamageAmt = dmgAmt,
             CurrentHealth = _healthManager.CurrentHealth,
             MaxHealth = _healthManager.MaxHealth,
@@ -45,6 +47,11 @@ public abstract class CharacterModel : MonoBehaviour
         EventBus<OnDeathEvent>.Raise(new OnDeathEvent{
             DiedCharacter = transform,
         });
+    }
+
+    //STATUS EFFECT PART
+    public void InflictStatusEffect(StatusEffect statusEffect, int stacks){
+        _statusEffectManager.InflictStatusEffect(statusEffect, stacks);
     }
     
     //DATA PART

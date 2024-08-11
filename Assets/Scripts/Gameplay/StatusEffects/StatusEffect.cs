@@ -1,12 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using LlwnrEventBus;
 using UnityEngine;
 
 public abstract class StatusEffect : ScriptableObject
 {
-    public abstract void Execute();
-    /*
-    Deal fire damage to the one who has this status effect
-    Reduce the stacks by 50%
-    */
+    public StatusEffectTrigger TriggerType;
+    public abstract void Execute(CharacterModel targetModel, int stacks);
+    public abstract int DecreaseStacks(int stacks);
 }

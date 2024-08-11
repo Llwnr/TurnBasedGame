@@ -29,7 +29,7 @@ public class CharacterSkillView : MonoBehaviour
     public void SetSkill(Button btn, SkillAction action, CharacterModel skillOwner){
         btn.onClick.AddListener(() => {
             CharacterModel target = TargetManager.SelectedEnemyTarget;
-            ActionManager.instance.AddPlayerAction(() => action.Execute(skillOwner, () => TargetManager.GetTargetOrAvailableTarget(target)));
+            ActionManager.instance.AddAction(() => action.Execute(skillOwner, () => TargetManager.GetTargetOrAvailableTarget(target)));
             _characterPresenter.OnSkillUsed();
         });
     }

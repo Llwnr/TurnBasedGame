@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using LlwnrEventBus;
 using UnityEngine;
 
 public class TurnManager : MonoBehaviour
@@ -14,7 +15,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    Queue<CharacterPresenter> _playerTurnQueue = new Queue<CharacterPresenter>();
+    Queue<CharacterPresenter> _turnQueue = new Queue<CharacterPresenter>();
     CharacterPresenter _currentPresenter;
     // Start is called before the first frame update
     IEnumerator Start()
@@ -29,25 +30,25 @@ public class TurnManager : MonoBehaviour
         myQueue = myQueue.OrderByDescending(x => x.GetFinalSpeed()).ToList();
         
         foreach(var playerCharacter in myQueue){
-            _playerTurnQueue.Enqueue(playerCharacter);
+            _turnQueue.Enqueue(playerCharacter);
         }
         
-        Debug.Log("Num of charas this round: " + _playerTurnQueue.Count);
+        Debug.Log("Num of charas this round: " + _turnQueue.Count);
         NextCharactersTurn();
         
     }
 
     public void NextCharactersTurn(){
-        if(_playerTurnQueue.Count <= 0){
+        if(_turnQueue.Count <= 0){
             return;
         }
-        _currentPresenter = _playerTurnQueue.Dequeue();
+        _currentPresenter = _turnQueue.Dequeue();
         _currentPresenter.OnCharacterTurnStart();
     }
 
-    public void NextPartysTurn(){
-        Debug.Log("Turn switched to next party");
-
+    public void SetNextGameTurn(){
         QueueTurn();
+        Debug.Log("Firing OnTurnStart event");
+        EventBus<OnTurnStart>.Raise(new OnTurnStart{});
     }
 }

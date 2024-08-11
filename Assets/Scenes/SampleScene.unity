@@ -1071,7 +1071,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23ba7078b50cf9043a8099ea1515c8c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currEnemy: {fileID: 0}
 --- !u!114 &1010750592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1272,6 +1271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterData: {fileID: 11400000, guid: d93fd15e8521d614c9e7558c52e92c95, type: 2}
+  _statusEffectManager: {fileID: 0}
 --- !u!61 &1059846809
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1811,6 +1811,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterData: {fileID: 11400000, guid: d93fd15e8521d614c9e7558c52e92c95, type: 2}
+  _statusEffectManager: {fileID: 0}
 --- !u!114 &1469476834
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1863,6 +1864,7 @@ GameObject:
   - component: {fileID: 1581581039}
   - component: {fileID: 1581581041}
   - component: {fileID: 1581581040}
+  - component: {fileID: 1581581042}
   - component: {fileID: 1581581038}
   m_Layer: 0
   m_Name: E1
@@ -1961,6 +1963,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterData: {fileID: 11400000, guid: 6bf938083c9ebf74b8b4c1d52ea24f7b, type: 2}
+  _statusEffectManager: {fileID: 1581581042}
 --- !u!61 &1581581041
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1987,6 +1990,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &1581581042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581581036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be53ac8658066245ac695ef0835144e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEffects: []
 --- !u!1 &1709102468
 GameObject:
   m_ObjectHideFlags: 0
@@ -2138,6 +2154,7 @@ GameObject:
   - component: {fileID: 1792065139}
   - component: {fileID: 1792065138}
   - component: {fileID: 1792065137}
+  - component: {fileID: 1792065140}
   - component: {fileID: 1792065136}
   m_Layer: 0
   m_Name: E2
@@ -2186,6 +2203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterData: {fileID: 11400000, guid: 6bf938083c9ebf74b8b4c1d52ea24f7b, type: 2}
+  _statusEffectManager: {fileID: 1792065140}
 --- !u!61 &1792065138
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2262,6 +2280,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1792065140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792065134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6be53ac8658066245ac695ef0835144e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statusEffects: []
 --- !u!1 &1909869582
 GameObject:
   m_ObjectHideFlags: 0
@@ -2561,6 +2592,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _characterData: {fileID: 11400000, guid: 542fdc5ce4879634592037804c166f35, type: 2}
+  _statusEffectManager: {fileID: 0}
 --- !u!61 &2071328842
 BoxCollider2D:
   m_ObjectHideFlags: 0

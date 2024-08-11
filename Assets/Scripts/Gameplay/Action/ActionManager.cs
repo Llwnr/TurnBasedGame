@@ -11,20 +11,13 @@ public class ActionManager : MonoBehaviour
         if(instance == null) instance = this;
         else Debug.LogError("More than 1 ActionManager");
     }
-    private Queue<Action> _playerActions = new Queue<Action>(), _enemyActions = new Queue<Action>();
+    private List<Action> _actions = new List<Action>();
     
-    public void AddPlayerAction(Action action){
-        _playerActions.Enqueue(action);
+    public void AddAction(Action action){
+        _actions.Add(action);
     }
-    public void RemovePlayerAction(){
-        _playerActions.Dequeue();
-    }
-
-    public void AddEnemyAction(Action action){
-        _enemyActions.Enqueue(action);
-    }
-    public void RemoveEnemyAction(){
-        _enemyActions.Dequeue();
+    public void RemoveLastAction(){
+        _actions.Remove(GetLastItem(_actions));
     }
 
     private void Update() {
@@ -32,25 +25,21 @@ public class ActionManager : MonoBehaviour
             Debug.Log("X key pressed");
             ExecutePlayerActions();
         }
-        if(Input.GetKeyDown(KeyCode.Z)){
-            Debug.Log("Z key pressed");
-            ExecuteEnemyActions();
-        }
     }
 
     async void ExecutePlayerActions(){
-        while(_playerActions.Count > 0){
-            _playerActions.Dequeue().Invoke();
+        while(_actions.Count > 0){
+            GetLastItem(_actions).Invoke();
+            RemoveLastAction();
             await Task.Delay(300);
         }
-        if(_playerActions.Count <= 0){
-            await Task.Delay(1000);
-            TurnManager.instance.NextPartysTurn();
+        if(_actions.Count <= 0){
+            await Task.Delay(2000);
+            TurnManager.instance.SetNextGameTurn();
         }
     }
-    void ExecuteEnemyActions(){
-        while(_enemyActions.Count > 0){
-            _enemyActions.Dequeue().Invoke();
-        }
+
+    Action GetLastItem(List<Action> actions){
+        return actions[actions.Count-1];
     }
 }
