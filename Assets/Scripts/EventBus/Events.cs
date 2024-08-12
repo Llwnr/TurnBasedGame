@@ -12,8 +12,18 @@ namespace LlwnrEventBus{
         public int age;
         public string myName;
     }
+    //When a status effect is inflicted
+    public struct OnStatusEffectInflicted : IEvent{
+        public StatusEffectManager StatusEffectManager;
+    }
     //When a character takes damage, fired by CharacterModel
     public struct OnDamageTakenEvent : IEvent{
+        public Transform HitCharacter;
+        public CharacterModel CharacterModel;
+        public float DamageAmt, CurrentHealth, MaxHealth;
+    }
+    //When a character takes status effect related damage
+    public struct OnStatusEffectDamageTakenEvent : IEvent{
         public Transform HitCharacter;
         public CharacterModel CharacterModel;
         public float DamageAmt, CurrentHealth, MaxHealth;

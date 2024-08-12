@@ -16,6 +16,4 @@ MonoBehaviour:
   Description: 
   MaxHealth: 50
   Speed: 2
-  MySkills:
-  - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}
-  - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}
+  MySkills: []

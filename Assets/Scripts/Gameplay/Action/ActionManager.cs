@@ -34,7 +34,7 @@ public class ActionManager : MonoBehaviour
             await Task.Delay(300);
         }
         if(_actions.Count <= 0){
-            await Task.Delay(2000);
+            await Task.Delay(1000);
             TurnManager.instance.SetNextGameTurn();
         }
     }

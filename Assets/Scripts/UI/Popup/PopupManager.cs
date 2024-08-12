@@ -8,7 +8,7 @@ public class PopupManager : MonoBehaviour
     float _timeDuration = 0.5f;
     [SerializeField]private TextMeshProUGUI textBox;
 
-    public void SetText(string text){
+    public void Initialize(string text){
         textBox.text = text;
     }
     // Update is called once per frame

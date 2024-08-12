@@ -16,4 +16,4 @@ MonoBehaviour:
   EnemyStatusEffects:
   - StatusEffect: {fileID: 11400000, guid: 978733d72e630f046870dff1bc783caa, type: 2}
     StacksToApply: 3
-  dmgMultiplier: 5
+  dmgMultiplier: 2

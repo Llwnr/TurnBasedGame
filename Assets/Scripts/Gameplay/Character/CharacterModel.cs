@@ -39,8 +39,23 @@ public abstract class CharacterModel : MonoBehaviour
             gameObject.SetActive(false);
             NotifyDeath();
         }
-        
-        
+    }
+    public void DealStatusEffectDamage(float dmgAmt){
+        _healthManager.DealDamage(dmgAmt);
+
+        Debug.Log("Firing 'OnStatusEffectDamageTakenEvent'");
+        EventBus<OnStatusEffectDamageTakenEvent>.Raise(new OnStatusEffectDamageTakenEvent{
+            HitCharacter = transform,
+            CharacterModel = this,
+            DamageAmt = dmgAmt,
+            CurrentHealth = _healthManager.CurrentHealth,
+            MaxHealth = _healthManager.MaxHealth,
+        });
+        //MANAGING WHEN A CHARACTER DIES
+        if(_healthManager.CurrentHealth <= 0){
+            gameObject.SetActive(false);
+            NotifyDeath();
+        }
     }
     void NotifyDeath(){
         Debug.Log("Firing 'OnDeathEvent'");
