@@ -10,6 +10,7 @@ namespace LlwnrEventBus
         public static void Deregister(EventBinding<T> binding) => bindings.Remove(binding);
 
         public static void Raise(T @event){
+            // Debug.Log("Firing: " + @event.GetType());
             foreach (var binding in bindings)
             {
                 binding.OnEvent.Invoke(@event);

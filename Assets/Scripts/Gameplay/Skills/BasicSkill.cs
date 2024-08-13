@@ -6,9 +6,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BasicSkill", menuName = "Skills/BasicSkill")]
 public class BasicSkill : SkillAction
 {
-    public float dmgMultiplier;
+    public float skillDmgMultiplier;
 
     public override void ExecuteSkill(CharacterModel skillUser, CharacterModel target){
-        target.DealDamage(skillUser.GetBaseDmg() * dmgMultiplier);
+        if(target.DealDamage(skillUser.GetBaseDmg() * skillDmgMultiplier)){
+            //To inflict status effect when damage is taken
+            InflictEffectsToTarget(target);
+        }
     }
 }

@@ -23,10 +23,9 @@ public abstract class CharacterModel : MonoBehaviour
     public List<SkillAction> GetSkills(){
         return _characterData.MySkills;
     }
-    public void DealDamage(float dmgAmt){
+    public bool DealDamage(float dmgAmt){
         _healthManager.DealDamage(dmgAmt);
 
-        Debug.Log("Firing 'OnDamageTakenEvent'");
         EventBus<OnDamageTakenEvent>.Raise(new OnDamageTakenEvent{
             HitCharacter = transform,
             CharacterModel = this,
@@ -39,11 +38,12 @@ public abstract class CharacterModel : MonoBehaviour
             gameObject.SetActive(false);
             NotifyDeath();
         }
+
+        return true;//Returns true if damage is dealt successfully to this character
     }
     public void DealStatusEffectDamage(float dmgAmt){
         _healthManager.DealDamage(dmgAmt);
 
-        Debug.Log("Firing 'OnStatusEffectDamageTakenEvent'");
         EventBus<OnStatusEffectDamageTakenEvent>.Raise(new OnStatusEffectDamageTakenEvent{
             HitCharacter = transform,
             CharacterModel = this,
@@ -58,14 +58,15 @@ public abstract class CharacterModel : MonoBehaviour
         }
     }
     void NotifyDeath(){
-        Debug.Log("Firing 'OnDeathEvent'");
+        // Debug.Log("Firing 'OnDeathEvent'");
         EventBus<OnDeathEvent>.Raise(new OnDeathEvent{
             DiedCharacter = transform,
         });
     }
 
     //STATUS EFFECT PART
-    public void InflictStatusEffect(StatusEffect statusEffect, int stacks){
+    public void InflictStatusEffect(StatusEffect statusEffect, int stacks){//Mostly to inflict SE when damage is not taken, like self buffs
+        Debug.Log(name);
         _statusEffectManager.InflictStatusEffect(statusEffect, stacks);
     }
     

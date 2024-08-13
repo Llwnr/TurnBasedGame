@@ -15,13 +15,17 @@ public class StatusEffectManager : MonoBehaviour
     //For example, when a turn starts, execute the _statusEffects related to it
     EventBinding<OnTurnStart> _onTurnStart;
     EventBinding<OnDamageTakenEvent> _onDamageTaken;
+    //To notify when a status effect is added, removed or changed
+    public event Action<StatusEffectData> OnStatusEffectAdded, OnStatusEffectRemoved, OnStatusEffectUpdated;
 
     private void Awake() {
         _characterModel = GetComponent<CharacterModel>();
 
-        _onTurnStart = new EventBinding<OnTurnStart>(() => ExecuteStatusEffects(StatusEffectTrigger.OnTurnStart));
+        _onTurnStart = new EventBinding<OnTurnStart>((OnTurnStart turnStart) => ExecuteStatusEffects(StatusEffectTrigger.OnTurnStart));
         EventBus<OnTurnStart>.Register(_onTurnStart);
-        _onDamageTaken = new EventBinding<OnDamageTakenEvent>(() => ExecuteStatusEffects(StatusEffectTrigger.OnDamageTakenEvent));
+        _onDamageTaken = new EventBinding<OnDamageTakenEvent>((OnDamageTakenEvent onDamageTakenEvent) => {
+            ExecuteStatusEffects(StatusEffectTrigger.OnDamageTakenEvent, onDamageTakenEvent.CharacterModel);
+        });
         EventBus<OnDamageTakenEvent>.Register(_onDamageTaken);
     }
 
@@ -31,52 +35,56 @@ public class StatusEffectManager : MonoBehaviour
     }
 
     public void InflictStatusEffect(StatusEffect statusEffect, int stacks){
-        
         //If there is no key in dictionary, initialize
         if(!_statusEffectsDatas.ContainsKey(statusEffect.TriggerType)){
             _statusEffectsDatas[statusEffect.TriggerType] = new List<StatusEffectData>();
         }
-        
-        StatusEffectData myStatusEffect = GetExistingStatusEffect(_statusEffectsDatas[statusEffect.TriggerType], statusEffect);
+        StatusEffectData myStatusEffect = FindStatusEffectByType(_statusEffectsDatas[statusEffect.TriggerType], statusEffect);
+        bool dataExists = myStatusEffect != null;
         //If the status effect doesn't exist in the dictionary, make a new one and add it
         if(myStatusEffect == null){
             myStatusEffect = new StatusEffectData{
                 StatusEffect = statusEffect,
             };
-            myStatusEffect.AddStacks(stacks);
             _statusEffectsDatas[statusEffect.TriggerType].Add(myStatusEffect);
-        }else{
-            myStatusEffect = GetExistingStatusEffect(_statusEffectsDatas[statusEffect.TriggerType], statusEffect);
-            //Add the status effect data to the dictionary based on its trigger type
-            if(myStatusEffect == null){
-                myStatusEffect = new StatusEffectData{
-                    StatusEffect = statusEffect,
-                };
-            }
-            myStatusEffect.AddStacks(stacks);
         }
-        
+        myStatusEffect.AddStacks(stacks); 
+        //Notify whether the status effect was added or updated
+        if(dataExists){
+            OnStatusEffectUpdated?.Invoke(myStatusEffect);
+        }else{
+            OnStatusEffectAdded?.Invoke(myStatusEffect);
+        }
     }
 
-    void ExecuteStatusEffects(StatusEffectTrigger trigger){
+    void ExecuteStatusEffects(StatusEffectTrigger trigger, CharacterModel targetModel = null){
+        //If targetModel is NOT null then check if this is the targetModel. Only run below if it is
+        //Check if this is the character that was hit
+        if(targetModel != null && targetModel != _characterModel) return;
         if(!_statusEffectsDatas.ContainsKey(trigger)) return;
-        foreach(var statusEffectData in _statusEffectsDatas[trigger]){
+
+        //Finally, execute all the status effects in the respective trigger key
+        for(int i=0; i<_statusEffectsDatas[trigger].Count; i++){
+            StatusEffectData statusEffectData = _statusEffectsDatas[trigger][i];
             StatusEffect statusEffect = statusEffectData.StatusEffect;
             statusEffect.Execute(_characterModel, statusEffectData.GetStacks());
-            if(statusEffect.DecreaseStacks(statusEffectData.GetStacks()) <= 0){
+            //Reduce the stacks after executing the status effect
+            int remainingStacks = statusEffect.DecreaseStacks(statusEffectData.GetStacks());
+            statusEffectData.SetStacks(remainingStacks);
+            OnStatusEffectUpdated?.Invoke(statusEffectData);
+            if(remainingStacks <= 0){//If no stacks remain, remove the status effect and notify its removal
                 RemoveStatusEffect(statusEffect, trigger);
+                OnStatusEffectRemoved?.Invoke(statusEffectData);
+                i--;
             }
         }
     }
 
-    async void RemoveStatusEffect(StatusEffect statusEffect, StatusEffectTrigger trigger){
-        await Task.Yield();
-        RemoveStatusEffect(_statusEffectsDatas[trigger], statusEffect);
-    }
-    void RemoveStatusEffect(List<StatusEffectData> statusEffectDatas, StatusEffect targetStatusEffect){
+    void RemoveStatusEffect(StatusEffect statusEffect, StatusEffectTrigger trigger){
+        List<StatusEffectData> statusEffectDatas = _statusEffectsDatas[trigger];
         for(int i=0; i<statusEffectDatas.Count; i++){
             StatusEffectData statusEffectData = statusEffectDatas[i];
-            if(statusEffectData.StatusEffect.GetType() == targetStatusEffect.GetType()){
+            if(statusEffectData.StatusEffect.GetType() == statusEffect.GetType()){
                 statusEffectDatas.Remove(statusEffectData);
                 i--;
             }
@@ -84,7 +92,7 @@ public class StatusEffectManager : MonoBehaviour
     }
 
     //Will return the StatusEffectData object that contains the targetted statusEffect.
-    StatusEffectData GetExistingStatusEffect(List<StatusEffectData> statusEffectDatas, StatusEffect targetStatusEffect){
+    StatusEffectData FindStatusEffectByType(List<StatusEffectData> statusEffectDatas, StatusEffect targetStatusEffect){
         foreach(var statusEffectData in statusEffectDatas){
             if(statusEffectData.StatusEffect.GetType() == targetStatusEffect.GetType()) return statusEffectData;
         }
@@ -94,12 +102,10 @@ public class StatusEffectManager : MonoBehaviour
     public List<StatusEffectData> GetMyStatusEffects(){
         List<StatusEffectData> statusEffects = new List<StatusEffectData>();
         foreach(StatusEffectTrigger trigger in Enum.GetValues(typeof(StatusEffectTrigger))){
-            if(!_statusEffectsDatas.ContainsKey(trigger)) continue;
-            foreach(StatusEffectData statusEffectData in _statusEffectsDatas[trigger]){
-                statusEffects.Add(statusEffectData);
+            if (_statusEffectsDatas.TryGetValue(trigger, out List<StatusEffectData> effects)) {
+                statusEffects.AddRange(effects);
             }
         }
-
         return statusEffects;
     }
 }

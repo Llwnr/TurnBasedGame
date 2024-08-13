@@ -19,6 +19,9 @@ public class StatusEffectData{
     public void AddStacks(int extraStacks){
         _stacks += extraStacks;
     }
+    public void SetStacks(int stacks){
+        _stacks = stacks;
+    }
     public int GetStacks(){
         return _stacks;
     }

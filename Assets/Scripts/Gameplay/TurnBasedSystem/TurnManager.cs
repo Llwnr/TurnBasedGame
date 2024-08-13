@@ -48,7 +48,6 @@ public class TurnManager : MonoBehaviour
 
     public void SetNextGameTurn(){
         QueueTurn();
-        Debug.Log("Firing OnTurnStart event");
         EventBus<OnTurnStart>.Raise(new OnTurnStart{});
     }
 }

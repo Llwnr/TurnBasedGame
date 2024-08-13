@@ -50,11 +50,11 @@ public class HealthView : MonoBehaviour
         }
     }
     async void DeactivateNextFrame(OnDeathEvent eventData){
+        await Task.Yield(); 
         if(eventData.DiedCharacter == null){
             Debug.LogWarning("Enemy has died. View should deactivate");
             return;
         }
-        await Task.Yield(); 
         if(eventData.DiedCharacter == transform) gameObject.SetActive(false);
     }
 
