@@ -26,12 +26,12 @@ public abstract class SkillAction : ScriptableObject
         }else{
             //THIS SKILL IS AOE SO:
             if(target is PlayerModel){
-                foreach(CharacterModel characterModel in TargetManager.GetAllPlayerModels()){
-                    ExecuteSkill(skillUser, characterModel);
+                foreach(CharacterModel currTarget in TargetManager.GetAllPlayerModels()){
+                    ExecuteSkill(skillUser, currTarget);
                 }
             }else{
-                foreach(CharacterModel characterModel in TargetManager.GetAllEnemyModels()){
-                    ExecuteSkill(skillUser, characterModel);
+                foreach(CharacterModel currTarget in TargetManager.GetAllEnemyModels()){
+                    ExecuteSkill(skillUser, currTarget);
                 }
             }
         }
