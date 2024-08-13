@@ -66,7 +66,6 @@ public abstract class CharacterModel : MonoBehaviour
 
     //STATUS EFFECT PART
     public void InflictStatusEffect(StatusEffect statusEffect, int stacks){//Mostly to inflict SE when damage is not taken, like self buffs
-        Debug.Log(name);
         _statusEffectManager.InflictStatusEffect(statusEffect, stacks);
     }
     

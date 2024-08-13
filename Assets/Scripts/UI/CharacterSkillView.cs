@@ -17,6 +17,8 @@ public class CharacterSkillView : MonoBehaviour
 
     //Create skill buttons based on the list of skills the character has
     public void InstantiateSkillButtons(List<SkillAction> skills, CharacterModel skillOwner){
+        Button label = Instantiate(_skillBtnPrefab, _container);
+        label.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = skillOwner.name;
         foreach(SkillAction skill in skills){
             Button newSkillBtn = Instantiate(_skillBtnPrefab, _container);
             newSkillBtn.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = skill.name;
