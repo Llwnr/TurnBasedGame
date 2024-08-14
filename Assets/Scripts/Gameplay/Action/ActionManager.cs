@@ -31,7 +31,7 @@ public class ActionManager : MonoBehaviour
         while(_actions.Count > 0){
             GetLastItem(_actions).Invoke();
             RemoveLastAction();
-            await Task.Delay(300);
+            await Task.Delay(1000);
         }
         if(_actions.Count <= 0){
             await Task.Delay(1000);

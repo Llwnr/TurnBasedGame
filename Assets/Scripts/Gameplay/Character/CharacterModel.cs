@@ -18,6 +18,12 @@ public abstract class CharacterModel : MonoBehaviour
     void InitializeHealthComponent(){
         _healthManager = new HealthManager(_characterData.MaxHealth);
     }
+    public void SubscribeToHealthChange(Action<float, float> action){
+        _healthManager.OnHealthChanged += action;
+    }
+    public void UnsubscribeToHealthChange(Action<float, float> action){
+        _healthManager.OnHealthChanged -= action;
+    }
 
     //FOR SKILLS
     public List<SkillAction> GetSkills(){
@@ -38,7 +44,6 @@ public abstract class CharacterModel : MonoBehaviour
             gameObject.SetActive(false);
             NotifyDeath();
         }
-
         return true;//Returns true if damage is dealt successfully to this character
     }
     public void DealStatusEffectDamage(float dmgAmt){

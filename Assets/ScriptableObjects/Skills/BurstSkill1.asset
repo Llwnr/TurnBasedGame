@@ -18,4 +18,4 @@ MonoBehaviour:
     StacksToApply: 5
   isAoe: 1
   Description: WOOOOOOOOOOOOOOOO
-  skillDmgMultiplier: 0
+  skillDmgMultiplier: 1

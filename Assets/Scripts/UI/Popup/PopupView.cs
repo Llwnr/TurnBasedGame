@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using LlwnrEventBus;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class PopupView : MonoBehaviour
 {
     [SerializeField]bool debug;
     [SerializeField]private Canvas _canvas;
-    [SerializeField]private PopupManager popupPrefab;
+    [SerializeField]private PopupPropertyManager popupPrefab;
     EventBinding<OnDamageTakenEvent> _onDamageTaken;
     EventBinding<OnStatusEffectDamageTakenEvent> _onSEDamageTakenEvent;
 
@@ -24,20 +25,18 @@ public class PopupView : MonoBehaviour
     }
 
     void CreateDmgPopup(OnDamageTakenEvent eventData){
-        PopupManager newPopup = Instantiate(popupPrefab, _canvas.transform, false);
-        newPopup.transform.position = Camera.main.WorldToScreenPoint(eventData.HitCharacter.position);
-        newPopup.Initialize(eventData.DamageAmt.ToString());
-        DebugOut("Creating dmg popups by listening to OnDamageTakenEvent");
+        CreateDmgPopup(eventData.CharacterModel.transform.position, eventData.DamageAmt);
+        
     }
     void CreateDmgPopup(OnStatusEffectDamageTakenEvent eventData){
-        PopupManager newPopup = Instantiate(popupPrefab, _canvas.transform, false);
-        newPopup.transform.position = Camera.main.WorldToScreenPoint(eventData.HitCharacter.position);
-        newPopup.Initialize(eventData.DamageAmt.ToString());
-        DebugOut("Creating dmg popups by listening to OnStEfDamageTakenEvent");
+        CreateDmgPopup(eventData.CharacterModel.transform.position, eventData.DamageAmt, 100);
     }
 
-    void DebugOut(object data){
-        if(!debug) return;
-        Debug.Log(data);
+    async void CreateDmgPopup(Vector2 pos, float dmgAmt, int delay=0){
+        await Task.Delay(delay);
+        PopupPropertyManager newPopup = Instantiate(popupPrefab, _canvas.transform, false);
+        if(delay>0) newPopup.transform.localScale *= 0.7f;
+        newPopup.transform.position = Camera.main.WorldToScreenPoint(pos);
+        newPopup.Initialize(dmgAmt.ToString());
     }
 }

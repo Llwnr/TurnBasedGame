@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class PopupManager : MonoBehaviour
+public class PopupPropertyManager : MonoBehaviour
 {
     float _timeDuration = 0.5f;
     [SerializeField]private TextMeshProUGUI textBox;
 
     public void Initialize(string text){
         textBox.text = text;
+        LeanTween.moveY(gameObject, transform.position.y + 100, 0.2f).setEaseOutQuart();
     }
     // Update is called once per frame
     void Update()

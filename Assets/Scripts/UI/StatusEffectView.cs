@@ -48,7 +48,6 @@ public class StatusEffectView : MonoBehaviour
         int index = 0;
         for(int i=0; i<_statusEffectDatas.Count; i++){
             if(_statusEffectDatas[i].StatusEffect.GetType() == data.StatusEffect.GetType()){
-                Debug.Log("Foind duplingca");
                 index = i;
                 break;
             }
@@ -63,5 +62,6 @@ public class StatusEffectView : MonoBehaviour
         int index = _statusEffectDatas.IndexOf(data);
         Destroy(_statusEffectUIs[index].gameObject);
         _statusEffectUIs.RemoveAt(index);
+        _statusEffectDatas.Remove(data);
     }
 }

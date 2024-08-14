@@ -13,6 +13,9 @@ public class TurnManager : MonoBehaviour
         else{
             Debug.LogError("More than 1 turn manager");
         }
+
+        Debug.Log("Resetting leantween from here");
+        LeanTween.reset();
     }
 
     Queue<CharacterPresenter> _turnQueue = new Queue<CharacterPresenter>();
