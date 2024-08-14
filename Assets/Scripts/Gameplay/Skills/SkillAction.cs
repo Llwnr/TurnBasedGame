@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-//This class will define which status effect to inflict, and how much stacks to inflict. Its use is finished once the skill inflicts the status effect
+//Data for inflicting a status effect when the skill hits
 public class EffectInflictData{
     public StatusEffect StatusEffect;
     public int StacksToApply = 1;
@@ -35,7 +35,6 @@ public abstract class SkillAction : ScriptableObject
                 }
             }
         }
-
     }
     public abstract void ExecuteSkill(CharacterModel skillUser, CharacterModel target);
 

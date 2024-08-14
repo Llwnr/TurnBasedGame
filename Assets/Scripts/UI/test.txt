@@ -1,0 +1,1225 @@
+// Manages the health of a character
+public class HealthManager
+{
+    // Current health of the character
+    public float CurrentHealth { get; private set; }
+    // Maximum health of the character
+    public float MaxHealth { get; private set; }
+
+    // Event triggered when health changes
+    public event Action<float, float> OnHealthChanged;
+
+    // Constructor to initialize health
+    public HealthManager(float maxHealth)
+    {
+        this.CurrentHealth = maxHealth;
+        this.MaxHealth = maxHealth;
+    }
+
+    // Deals damage to the character
+    public void DealDamage(float dmgAmt)
+    {
+        CurrentHealth -= dmgAmt;
+        // Trigger the OnHealthChanged event
+        OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+    }
+}
+
+// Represents a basic skill
+[CreateAssetMenu(fileName = "BasicSkill", menuName = "Skills/BasicSkill")]
+public class BasicSkill : SkillAction
+{
+    // Damage multiplier for the skill
+    public float skillDmgMultiplier;
+
+    // Executes the skill
+    public override void ExecuteSkill(CharacterModel skillUser, CharacterModel target)
+    {
+        // Deals damage to the target
+        if (target.DealDamage(skillUser.GetBaseDmg() * skillDmgMultiplier))
+        {
+            // Inflicts status effects on the target
+            InflictEffectsToTarget(target);
+        }
+    }
+}
+
+// Represents a burst skill
+[CreateAssetMenu(fileName = "BurstSkill", menuName = "Skills/BurstSkill")]
+public class BurstSkill : SkillAction
+{
+    // Damage multiplier for the skill
+    public float skillDmgMultiplier;
+
+    // Executes the skill
+    public override void ExecuteSkill(CharacterModel skillUser, CharacterModel target)
+    {
+        // Deals damage to the target
+        if (target.DealDamage(skillUser.GetBaseDmg() * skillDmgMultiplier))
+        {
+            // Inflicts status effects on the target
+            InflictEffectsToTarget(target);
+        }
+    }
+}
+
+// Data for inflicting a status effect
+[Serializable]
+public class EffectInflictData
+{
+    // Status effect to inflict
+    public StatusEffect StatusEffect;
+    // Number of stacks to apply
+    public int StacksToApply = 1;
+}
+
+// Base class for skill actions
+public abstract class SkillAction : ScriptableObject
+{
+    // Status effects to inflict on self and enemy
+    public List<EffectInflictData> SelfStatusEffects, EnemyStatusEffects;
+    // Whether the skill is an AoE (Area of Effect)
+    public bool isAoe = false;
+    // Description of the skill
+    [TextArea(3, 10)]
+    public string Description;
+
+    // Executes the skill
+    public void Execute(CharacterModel skillUser, Func<CharacterModel> targetFinder)
+    {
+        // Don't execute if the skill user is dead
+        if (!skillUser.gameObject.activeSelf) return;
+
+        // Get the target
+        CharacterModel target = targetFinder.Invoke();
+
+        // Execute the skill based on whether it's AoE or not
+        if (!isAoe)
+        {
+            ExecuteSkill(skillUser, target);
+            InflictSelfEffects(skillUser);
+        }
+        else
+        {
+            // Execute the skill on all targets
+            if (target is PlayerModel)
+            {
+                foreach (CharacterModel currTarget in TargetManager.GetAllPlayerModels())
+                {
+                    ExecuteSkill(skillUser, currTarget);
+                }
+            }
+            else
+            {
+                foreach (CharacterModel currTarget in TargetManager.GetAllEnemyModels())
+                {
+                    ExecuteSkill(skillUser, currTarget);
+                }
+            }
+        }
+    }
+
+    // Abstract method for executing the skill
+    public abstract void ExecuteSkill(CharacterModel skillUser, CharacterModel target);
+
+    // Inflicts self effects
+    void InflictSelfEffects(CharacterModel skillUser)
+    {
+        foreach (EffectInflictData statusEffectData in SelfStatusEffects)
+        {
+            skillUser.InflictStatusEffect(statusEffectData.StatusEffect, statusEffectData.StacksToApply);
+        }
+    }
+
+    // Inflicts effects on the target
+    protected void InflictEffectsToTarget(CharacterModel target)
+    {
+        foreach (EffectInflictData statusEffectData in EnemyStatusEffects)
+        {
+            target.InflictStatusEffect(statusEffectData.StatusEffect, statusEffectData.StacksToApply);
+        }
+    }
+}
+
+// Represents a burn status effect
+[CreateAssetMenu(fileName = "BurnEffect", menuName = "StatusEffects/BurnEffect")]
+public class BurnEffect : StatusEffect
+{
+    // Damage dealt by the burn effect
+    public float burnDmg;
+
+    // Executes the burn effect
+    public override void Execute(CharacterModel targetModel, int stacks)
+    {
+        // Deals damage to the target
+        targetModel.DealStatusEffectDamage(burnDmg * stacks);
+    }
+
+    // Decreases the stacks of the burn effect
+    public override int DecreaseStacks(int stacks)
+    {
+        // Decreases stacks by half
+        stacks = Mathf.FloorToInt(stacks * 0.5f);
+        return stacks;
+    }
+}
+
+// Represents a rupture status effect
+[CreateAssetMenu(fileName = "RuptureEffect", menuName = "StatusEffects/RuptureEffect")]
+public class RuptureEffect : StatusEffect
+{
+    // Damage dealt by the rupture effect
+    public float ruptureDmg;
+
+    // Executes the rupture effect
+    public override void Execute(CharacterModel targetModel, int stacks)
+    {
+        // Deals damage to the target
+        targetModel.DealStatusEffectDamage(ruptureDmg * stacks);
+    }
+
+    // Decreases the stacks of the rupture effect
+    public override int DecreaseStacks(int stacks)
+    {
+        // Decreases stacks by half
+        stacks = Mathf.FloorToInt(stacks * 0.5f);
+        return stacks;
+    }
+}
+
+// Base class for status effects
+public abstract class StatusEffect : ScriptableObject
+{
+    // Trigger type for the status effect
+    public StatusEffectTrigger TriggerType;
+    // Executes the status effect
+    public abstract void Execute(CharacterModel targetModel, int stacks);
+    // Decreases the stacks of the status effect
+    public abstract int DecreaseStacks(int stacks);
+    // Description of the status effect
+    [TextArea(3, 10)]
+    public string Description;
+    // Icon for the status effect
+    public Sprite Icon;
+}
+
+// Data for a status effect
+public class StatusEffectData
+{
+    // Status effect
+    public StatusEffect StatusEffect;
+    // Number of stacks
+    int _stacks = 0;
+
+    // Adds stacks to the status effect
+    public void AddStacks(int extraStacks)
+    {
+        _stacks += extraStacks;
+    }
+
+    // Sets the stacks of the status effect
+    public void SetStacks(int stacks)
+    {
+        _stacks = stacks;
+    }
+
+    // Gets the stacks of the status effect
+    public int GetStacks()
+    {
+        return _stacks;
+    }
+}
+
+// Manages status effects on a character
+[RequireComponent(typeof(CharacterModel))]
+public class StatusEffectManager : MonoBehaviour
+{
+    // Dictionary of status effects, keyed by trigger type
+    Dictionary<StatusEffectTrigger, List<StatusEffectData>> _statusEffectsDatas = new Dictionary<StatusEffectTrigger, List<StatusEffectData>>();
+    // Character model associated with this manager
+    CharacterModel _characterModel;
+
+    // Event bindings for OnTurnStart and OnDamageTakenEvent
+    EventBinding<OnTurnStart> _onTurnStart;
+    EventBinding<OnDamageTakenEvent> _onDamageTaken;
+
+    // Events for status effect changes
+    public event Action<StatusEffectData> OnStatusEffectAdded, OnStatusEffectRemoved, OnStatusEffectUpdated;
+
+    // Initializes the manager
+    private void Awake()
+    {
+        _characterModel = GetComponent<CharacterModel>();
+
+        // Register event bindings
+        _onTurnStart = new EventBinding<OnTurnStart>((OnTurnStart turnStart) => ExecuteStatusEffects(StatusEffectTrigger.OnTurnStart));
+        EventBus<OnTurnStart>.Register(_onTurnStart);
+
+        _onDamageTaken = new EventBinding<OnDamageTakenEvent>((OnDamageTakenEvent onDamageTakenEvent) =>
+        {
+            ExecuteStatusEffects(StatusEffectTrigger.OnDamageTakenEvent, onDamageTakenEvent.CharacterModel);
+        });
+        EventBus<OnDamageTakenEvent>.Register(_onDamageTaken);
+    }
+
+    // Cleans up event bindings
+    private void OnDestroy()
+    {
+        EventBus<OnTurnStart>.Deregister(_onTurnStart);
+        EventBus<OnDamageTakenEvent>.Deregister(_onDamageTaken);
+    }
+
+    // Inflicts a status effect on the character
+    public void InflictStatusEffect(StatusEffect statusEffect, int stacks)
+    {
+        // Initialize the list for the trigger type if it doesn't exist
+        if (!_statusEffectsDatas.ContainsKey(statusEffect.TriggerType))
+        {
+            _statusEffectsDatas[statusEffect.TriggerType] = new List<StatusEffectData>();
+        }
+
+        // Find the existing status effect data
+        StatusEffectData myStatusEffect = FindStatusEffectByType(_statusEffectsDatas[statusEffect.TriggerType], statusEffect);
+        bool dataExists = myStatusEffect != null;
+
+        // Create a new status effect data if it doesn't exist
+        if (myStatusEffect == null)
+        {
+            myStatusEffect = new StatusEffectData
+            {
+                StatusEffect = statusEffect,
+            };
+            _statusEffectsDatas[statusEffect.TriggerType].Add(myStatusEffect);
+        }
+
+        // Add stacks to the status effect
+        myStatusEffect.AddStacks(stacks);
+
+        // Trigger the appropriate event
+        if (dataExists)
+        {
+            OnStatusEffectUpdated?.Invoke(myStatusEffect);
+        }
+        else
+        {
+            OnStatusEffectAdded?.Invoke(myStatusEffect);
+        }
+    }
+
+    // Executes status effects for a given trigger
+    void ExecuteStatusEffects(StatusEffectTrigger trigger, CharacterModel targetModel = null)
+    {
+        // Check if this is the target model
+        if (targetModel != null && targetModel != _characterModel) return;
+
+        // Check if there are any status effects for the trigger
+        if (!_statusEffectsDatas.ContainsKey(trigger)) return;
+
+        // Execute each status effect
+        for (int i = 0; i < _statusEffectsDatas[trigger].Count; i++)
+        {
+            StatusEffectData statusEffectData = _statusEffectsDatas[trigger][i];
+            StatusEffect statusEffect = statusEffectData.StatusEffect;
+
+            // Execute the status effect
+            statusEffect.Execute(_characterModel, statusEffectData.GetStacks());
+
+            // Decrease the stacks
+            int remainingStacks = statusEffect.DecreaseStacks(statusEffectData.GetStacks());
+            statusEffectData.SetStacks(remainingStacks);
+            OnStatusEffectUpdated?.Invoke(statusEffectData);
+
+            // Remove the status effect if there are no stacks left
+            if (remainingStacks <= 0)
+            {
+                RemoveStatusEffect(statusEffect, trigger);
+                OnStatusEffectRemoved?.Invoke(statusEffectData);
+                i--;
+            }
+        }
+    }
+
+    // Removes a status effect
+    void RemoveStatusEffect(StatusEffect statusEffect, StatusEffectTrigger trigger)
+    {
+        List<StatusEffectData> statusEffectDatas = _statusEffectsDatas[trigger];
+        for (int i = 0; i < statusEffectDatas.Count; i++)
+        {
+            StatusEffectData statusEffectData = statusEffectDatas[i];
+            if (statusEffectData.StatusEffect.GetType() == statusEffect.GetType())
+            {
+                statusEffectDatas.Remove(statusEffectData);
+                i--;
+            }
+        }
+    }
+
+    // Finds a status effect by type
+    StatusEffectData FindStatusEffectByType(List<StatusEffectData> statusEffectDatas, StatusEffect targetStatusEffect)
+    {
+        foreach (var statusEffectData in statusEffectDatas)
+        {
+            if (statusEffectData.StatusEffect.GetType() == targetStatusEffect.GetType()) return statusEffectData;
+        }
+        return null;
+    }
+
+    // Gets all status effects on the character
+    public List<StatusEffectData> GetMyStatusEffects()
+    {
+        List<StatusEffectData> statusEffects = new List<StatusEffectData>();
+        foreach (StatusEffectTrigger trigger in Enum.GetValues(typeof(StatusEffectTrigger)))
+        {
+            if (_statusEffectsDatas.TryGetValue(trigger, out List<StatusEffectData> effects))
+            {
+                statusEffects.AddRange(effects);
+            }
+        }
+        return statusEffects;
+    }
+}
+
+// Enum for status effect triggers
+public enum StatusEffectTrigger
+{
+    OnTurnStart,
+    OnDamageTakenEvent
+}
+
+// Manages target selection
+public static class TargetManager
+{
+    // Selected player and enemy targets
+    static CharacterModel _playerTargetModel, _enemyTargetModel;
+
+    // Selected player target
+    public static CharacterModel SelectedPlayerTarget
+    {
+        get { return _playerTargetModel; }
+        set
+        {
+            if (value == null) return;
+            _playerTargetModel = value;
+            OnPlayerTargetChange.Invoke(_playerTargetModel.transform);
+        }
+    }
+
+    // Selected enemy target
+    public static CharacterModel SelectedEnemyTarget
+    {
+        get { return _enemyTargetModel; }
+        set
+        {
+            if (value == null) return;
+            _enemyTargetModel = value;
+            OnEnemyTargetChange.Invoke(_enemyTargetModel.transform);
+        }
+    }
+
+    // Events for target changes
+    public static event Action<Transform> OnPlayerTargetChange;
+    public static event Action<Transform> OnEnemyTargetChange;
+    public static event Action OnEmptyTargetClicked;
+
+    // Gets the target or an available target if the current target is dead
+    public static CharacterModel GetTargetOrAvailableTarget(CharacterModel target)
+    {
+        // Find a new target if the current target is dead
+        if (!target || !target.gameObject.activeSelf)
+        {
+            if (target is PlayerModel) target = SelectedPlayerTarget;
+            else if (target is EnemyModel) target = SelectedEnemyTarget;
+        }
+        return target;
+    }
+
+    // Notifies when an empty target is clicked
+    public static void NonTargetClicked()
+    {
+        OnEmptyTargetClicked.Invoke();
+    }
+
+    // Sets the player target
+    public static void SetPlayerTargetModel(CharacterModel target)
+    {
+        if (target == null) return;
+        SelectedPlayerTarget = target;
+    }
+
+    // Sets the enemy target
+    public static void SetEnemyTargetModel(CharacterModel target)
+    {
+        if (target == null) return;
+        SelectedEnemyTarget = target;
+    }
+
+    // Gets all player models
+    public static PlayerModel[] GetAllPlayerModels()
+    {
+        return UnityEngine.Object.FindObjectsOfType<PlayerModel>();
+    }
+
+    // Gets all enemy models
+    public static EnemyModel[] GetAllEnemyModels()
+    {
+        return UnityEngine.Object.FindObjectsOfType<EnemyModel>();
+    }
+}
+
+// Sets the target based on mouse clicks
+public class TargetSetter : MonoBehaviour
+{
+    // Event binding for OnDeathEvent
+    EventBinding<OnDeathEvent> _OnDeathEvent;
+
+    // Sets the default target
+    private void Start()
+    {
+        SetDefaultTarget();
+    }
+
+    // Tries to set the target based on mouse clicks
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            TrySetTarget(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        }
+    }
+
+    // Registers and deregisters the OnDeathEvent binding
+    private void OnEnable()
+    {
+        _OnDeathEvent = new EventBinding<OnDeathEvent>(SetDefaultTarget);
+        EventBus<OnDeathEvent>.Register(_OnDeathEvent);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<OnDeathEvent>.Deregister(_OnDeathEvent);
+    }
+
+    // Sets the default target
+    void SetDefaultTarget()
+    {
+        // Set default targets
+        TargetManager.SetPlayerTargetModel(FindObjectOfType<PlayerModel>());
+        TargetManager.SetEnemyTargetModel(FindObjectOfType<EnemyModel>());
+
+        // Hide highlight boxes
+        TargetManager.NonTargetClicked();
+    }
+
+    // Tries to set the target based on raycast
+    void TrySetTarget(Vector2 clickedPos)
+    {
+        RaycastHit2D[] hits = Physics2D.RaycastAll(clickedPos, Vector2.zero);
+        if (hits.Length <= 0)
+        {
+            TargetManager.NonTargetClicked();
+        }
+        foreach (var hit in hits)
+        {
+            if (hit.collider == null) return;
+            Transform hitTransform = hit.transform;
+            if (hitTransform.CompareTag("Player"))
+            {
+                TargetManager.SetPlayerTargetModel(hitTransform.GetComponent<CharacterModel>());
+            }
+            else if (hitTransform.CompareTag("Enemy"))
+            {
+                TargetManager.SetEnemyTargetModel(hitTransform.GetComponent<CharacterModel>());
+            }
+            else
+            {
+                TargetManager.NonTargetClicked();
+            }
+        }
+    }
+}
+
+// Manages the turn-based system
+public class TurnManager : MonoBehaviour
+{
+    // Singleton instance
+    public static TurnManager instance;
+
+    // Queue of character presenters
+    Queue<CharacterPresenter> _turnQueue = new Queue<CharacterPresenter>();
+    // Current character presenter
+    CharacterPresenter _currentPresenter;
+
+    // Initializes the turn manager
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else
+        {
+            Debug.LogError("More than 1 turn manager");
+        }
+
+        // Reset LeanTween
+        Debug.Log("Resetting leantween from here");
+        LeanTween.reset();
+    }
+
+    // Starts the turn-based system
+    IEnumerator Start()
+    {
+        yield return new WaitForEndOfFrame();
+        QueueTurn();
+    }
+
+    // Queues the turns for each character
+    void QueueTurn()
+    {
+        // Get all character presenters and sort them by speed
+        List<CharacterPresenter> myQueue = FindObjectsOfType<CharacterPresenter>().ToList();
+        myQueue = myQueue.OrderByDescending(x => x.GetFinalSpeed()).ToList();
+
+        // Enqueue each character presenter
+        foreach (var playerCharacter in myQueue)
+        {
+            _turnQueue.Enqueue(playerCharacter);
+        }
+
+        // Log the number of characters and start the next character's turn
+        Debug.Log("Num of charas this round: " + _turnQueue.Count);
+        NextCharactersTurn();
+    }
+
+    // Starts the next character's turn
+    public void NextCharactersTurn()
+    {
+        if (_turnQueue.Count <= 0)
+        {
+            return;
+        }
+
+        // Dequeue the next character presenter and start their turn
+        _currentPresenter = _turnQueue.Dequeue();
+        _currentPresenter.OnCharacterTurnStart();
+    }
+
+    // Sets the next game turn
+    public void SetNextGameTurn()
+    {
+        // Queue the turns and raise the OnTurnStart event
+        QueueTurn();
+        EventBus<OnTurnStart>.Raise(new OnTurnStart {});
+    }
+}
+
+// Manages the properties of a popup
+public class PopupPropertyManager : MonoBehaviour
+{
+    // Duration of the popup
+    float _timeDuration = 0.5f;
+    // Text mesh pro text box
+    [SerializeField] private TextMeshProUGUI textBox;
+
+    // Initializes the popup
+    public void Initialize(string text)
+    {
+        textBox.text = text;
+        LeanTween.moveY(gameObject, transform.position.y + 100, 0.2f).setEaseOutQuart();
+    }
+
+    // Destroys the popup after its duration
+    void Update()
+    {
+        _timeDuration -= Time.deltaTime;
+        if (_timeDuration < 0) Destroy(gameObject);
+    }
+}
+
+// Manages the popup view
+public class PopupView : MonoBehaviour
+{
+    // Whether to enable debug mode
+    [SerializeField] bool debug;
+    // Canvas for the popup
+    [SerializeField] private Canvas _canvas;
+    // Popup prefab
+    [SerializeField] private PopupPropertyManager popupPrefab;
+
+    // Event bindings for OnDamageTakenEvent and OnStatusEffectDamageTakenEvent
+    EventBinding<OnDamageTakenEvent> _onDamageTaken;
+    EventBinding<OnStatusEffectDamageTakenEvent> _onSEDamageTakenEvent;
+
+    // Registers and deregisters event bindings
+    private void OnEnable()
+    {
+        _onDamageTaken = new EventBinding<OnDamageTakenEvent>(CreateDmgPopup);
+        EventBus<OnDamageTakenEvent>.Register(_onDamageTaken);
+
+        _onSEDamageTakenEvent = new EventBinding<OnStatusEffectDamageTakenEvent>(CreateDmgPopup);
+        EventBus<OnStatusEffectDamageTakenEvent>.Register(_onSEDamageTakenEvent);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<OnDamageTakenEvent>.Deregister(_onDamageTaken);
+        EventBus<OnStatusEffectDamageTakenEvent>.Deregister(_onSEDamageTakenEvent);
+    }
+
+    // Creates a damage popup
+    void CreateDmgPopup(OnDamageTakenEvent eventData)
+    {
+        CreateDmgPopup(eventData.CharacterModel.transform.position, eventData.DamageAmt);
+    }
+
+    // Creates a damage popup for status effect damage
+    void CreateDmgPopup(OnStatusEffectDamageTakenEvent eventData)
+    {
+        CreateDmgPopup(eventData.CharacterModel.transform.position, eventData.DamageAmt, 100);
+    }
+
+    // Creates a damage popup with optional delay
+    async void CreateDmgPopup(Vector2 pos, float dmgAmt, int delay = 0)
+    {
+        await Task.Delay(delay);
+        PopupPropertyManager newPopup = Instantiate(popupPrefab, _canvas.transform, false);
+        if (delay > 0) newPopup.transform.localScale *= 0.7f;
+        newPopup.transform.position = Camera.main.WorldToScreenPoint(pos);
+        newPopup.Initialize(dmgAmt.ToString());
+    }
+}
+
+// Manages the character skill view
+public class CharacterSkillView : MonoBehaviour
+{
+    // Container for skill buttons
+    [SerializeField] private Transform _container;
+    // Skill button prefab
+    [SerializeField] private Button _skillBtnPrefab;
+    // Character presenter
+    private CharacterPresenter _characterPresenter;
+    // List of skill buttons
+    private List<Button> _skillButtons = new List<Button>();
+
+    // Initializes the view
+    public void InitializeView(CharacterPresenter myCharacterPresenter)
+    {
+        _characterPresenter = myCharacterPresenter;
+    }
+
+    // Instantiates skill buttons
+    public void InstantiateSkillButtons(List<SkillAction> skills, CharacterModel skillOwner)
+    {
+        // Create a label for the character
+        Button label = Instantiate(_skillBtnPrefab, _container);
+        label.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = skillOwner.name;
+
+        // Create a button for each skill
+        foreach (SkillAction skill in skills)
+        {
+            Button newSkillBtn = Instantiate(_skillBtnPrefab, _container);
+            newSkillBtn.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = skill.name;
+            SetSkill(newSkillBtn, skill, skillOwner);
+            _skillButtons.Add(newSkillBtn);
+        }
+    }
+
+    // Sets the skill for a button
+    public void SetSkill(Button btn, SkillAction action, CharacterModel skillOwner)
+    {
+        btn.onClick.AddListener(() =>
+        {
+            // Get the target and add the action to the ActionManager
+            CharacterModel target = TargetManager.SelectedEnemyTarget;
+            ActionManager.instance.AddAction(() => action.Execute(skillOwner, () => TargetManager.GetTargetOrAvailableTarget(target)));
+
+            // Notify the character presenter that the skill was used
+            _characterPresenter.OnSkillUsed();
+        });
+    }
+
+    // Sets the visibility of the skill buttons
+    public void SetSkillsVisible(bool value)
+    {
+        _container.gameObject.SetActive(value);
+    }
+}
+
+// Manages the health view
+public class HealthView : MonoBehaviour
+{
+    // Character model associated with this view
+    [SerializeField] private CharacterModel _myCharacter;
+    // Health bar image
+    [SerializeField] private Image _healthBar;
+    // Whether to enable debug mode
+    [SerializeField] bool debug;
+
+    // Initializes the view
+    private void Start()
+    {
+        AlignToModelPos();
+        _myCharacter.SubscribeToHealthChange(UpdateHealthBar);
+    }
+
+    // Aligns the health bar to the character's position
+    void AlignToModelPos()
+    {
+        _healthBar.transform.position = Camera.main.WorldToScreenPoint(_myCharacter.transform.position + new Vector3(0, 0.7f, 0));
+    }
+
+    // Unsubscribes from the health change event
+    private void OnDestroy()
+    {
+        _myCharacter.UnsubscribeToHealthChange(UpdateHealthBar);
+    }
+
+    // Updates the health bar
+    void UpdateHealthBar(float currHealth, float maxHealth)
+    {
+        _healthBar.fillAmount = currHealth / maxHealth;
+    }
+}
+
+// Manages the status effect view
+public class StatusEffectView : MonoBehaviour
+{
+    // Status effect manager
+    [SerializeField] private StatusEffectManager _statusEffectManager;
+    // Status effect icon prefab
+    [SerializeField] private Image _statusEffectIconPrefab;
+    // Container for status effect icons
+    [SerializeField] private GameObject _container;
+    // Y offset for the status effect icons
+    [SerializeField] private float yOffset;
+
+    // Lists of status effect data and UI elements
+    List<StatusEffectData> _statusEffectDatas = new List<StatusEffectData>();
+    List<GameObject> _statusEffectUIs = new List<GameObject>();
+
+    // Initializes the view
+    private void Start()
+    {
+        AlignToModelPos();
+    }
+
+    // Registers and deregisters event listeners
+    private void OnEnable()
+    {
+        _statusEffectManager.OnStatusEffectAdded += AddStatusEffectUI;
+        _statusEffectManager.OnStatusEffectUpdated += UpdateStatusEffectUI;
+        _statusEffectManager.OnStatusEffectRemoved += RemoveStatusEffectUI;
+    }
+
+    private void OnDisable()
+    {
+        if (!_statusEffectManager) return;
+        _statusEffectManager.OnStatusEffectAdded -= AddStatusEffectUI;
+        _statusEffectManager.OnStatusEffectUpdated -= UpdateStatusEffectUI;
+        _statusEffectManager.OnStatusEffectRemoved -= RemoveStatusEffectUI;
+    }
+
+    // Aligns the status effect icons to the character's position
+    void AlignToModelPos()
+    {
+        _container.transform.position = Camera.main.WorldToScreenPoint(_statusEffectManager.transform.position + new Vector3(0, yOffset, 0));
+    }
+
+    // Adds a status effect UI element
+    void AddStatusEffectUI(StatusEffectData data)
+    {
+        _statusEffectDatas.Add(data);
+
+        Image newIcon = Instantiate(_statusEffectIconPrefab, _container.transform);
+        newIcon.sprite = data.StatusEffect.Icon;
+        newIcon.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = data.GetStacks().ToString();
+        newIcon.name = data.StatusEffect.GetType().ToString();
+        _statusEffectUIs.Add(newIcon.gameObject);
+    }
+
+    // Updates a status effect UI element
+    void UpdateStatusEffectUI(StatusEffectData data)
+    {
+        int myStacks;
+        int index = 0;
+        for (int i = 0; i < _statusEffectDatas.Count; i++)
+        {
+            if (_statusEffectDatas[i].StatusEffect.GetType() == data.StatusEffect.GetType())
+            {
+                index = i;
+                break;
+            }
+            if (i == _statusEffectDatas.Count - 1)
+            {
+                Debug.LogError("No status effect of the type " + data + " stored in list");
+            }
+        }
+        myStacks = data.GetStacks();
+        _statusEffectUIs[index].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = myStacks.ToString();
+    }
+
+    // Removes a status effect UI element
+    void RemoveStatusEffectUI(StatusEffectData data)
+    {
+        int index = _statusEffectDatas.IndexOf(data);
+        Destroy(_statusEffectUIs[index].gameObject);
+        _statusEffectUIs.RemoveAt(index);
+        _statusEffectDatas.Remove(data);
+    }
+}
+
+// Manages the target view
+public class TargetView : MonoBehaviour
+{
+    // Highlight images for player and enemy targets
+    [SerializeField] private Image highlightPlayer, highlightEnemy;
+
+    // Registers and deregisters event listeners
+    private void OnEnable()
+    {
+        TargetManager.OnPlayerTargetChange += SetPlayerHighlight;
+        TargetManager.OnEnemyTargetChange += SetEnemyHighlight;
+        TargetManager.OnEmptyTargetClicked += DisableHighlight;
+    }
+
+    private void OnDisable()
+    {
+        TargetManager.OnPlayerTargetChange -= SetPlayerHighlight;
+        TargetManager.OnEnemyTargetChange -= SetEnemyHighlight;
+        TargetManager.OnEmptyTargetClicked -= DisableHighlight;
+    }
+
+    // Sets the player highlight
+    void SetPlayerHighlight(Transform target)
+    {
+        highlightPlayer.gameObject.SetActive(true);
+        highlightPlayer.transform.position = Camera.main.WorldToScreenPoint(target.position);
+    }
+
+    // Sets the enemy highlight
+    void SetEnemyHighlight(Transform target)
+    {
+        highlightEnemy.gameObject.SetActive(true);
+        highlightEnemy.transform.position = Camera.main.WorldToScreenPoint(target.position);
+    }
+
+    // Disables the highlights
+    void DisableHighlight()
+    {
+        highlightPlayer.gameObject.SetActive(false);
+        highlightEnemy.gameObject.SetActive(false);
+    }
+}
+You're right, there are more files to document. Here are the remaining files with inline comments:
+
+// Manages the actions in the game
+public class ActionManager : MonoBehaviour
+{
+    // Singleton instance
+    public static ActionManager instance;
+
+    // List of actions to be executed
+    private List<Action> _actions = new List<Action>();
+
+    // Initializes the ActionManager
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else Debug.LogError("More than 1 ActionManager");
+    }
+
+    // Adds an action to the list
+    public void AddAction(Action action)
+    {
+        _actions.Add(action);
+    }
+
+    // Removes the last action from the list
+    public void RemoveLastAction()
+    {
+        _actions.Remove(GetLastItem(_actions));
+    }
+
+    // Executes player actions when the X key is pressed
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            Debug.Log("X key pressed");
+            ExecutePlayerActions();
+        }
+    }
+
+    // Executes player actions sequentially
+    async void ExecutePlayerActions()
+    {
+        while (_actions.Count > 0)
+        {
+            GetLastItem(_actions).Invoke();
+            RemoveLastAction();
+            await Task.Delay(1000);
+        }
+
+        // Sets the next game turn after all actions are executed
+        if (_actions.Count <= 0)
+        {
+            await Task.Delay(1000);
+            TurnManager.instance.SetNextGameTurn();
+        }
+    }
+
+    // Gets the last item in the list
+    Action GetLastItem(List<Action> actions)
+    {
+        return actions[actions.Count - 1];
+    }
+}
+
+// Stores character data
+[CreateAssetMenu(fileName = "CharacterData", menuName = "CharacterData", order = 0)]
+public class CharacterData : ScriptableObject
+{
+    // Basic information
+    [Header("Basic Information")]
+    public string Name;
+    public string Description;
+
+    // Core stats
+    [Header("Core Stats")]
+    public float MaxHealth;
+    public float Speed;
+
+    // Skills
+    [Header("Skills")]
+    public List<SkillAction> MySkills;
+}
+
+// Represents the model for a character
+public abstract class CharacterModel : MonoBehaviour
+{
+    // Character data
+    [SerializeField] protected CharacterData _characterData;
+    // Status effect manager
+    [SerializeField] protected StatusEffectManager _statusEffectManager;
+    // Health manager
+    private HealthManager _healthManager;
+
+    // Initializes the health component
+    protected virtual void Awake()
+    {
+        InitializeHealthComponent();
+    }
+
+    // Initializes the health manager
+    void InitializeHealthComponent()
+    {
+        _healthManager = new HealthManager(_characterData.MaxHealth);
+    }
+
+    // Subscribes to the health change event
+    public void SubscribeToHealthChange(Action<float, float> action)
+    {
+        _healthManager.OnHealthChanged += action;
+    }
+
+    // Unsubscribes from the health change event
+    public void UnsubscribeToHealthChange(Action<float, float> action)
+    {
+        _healthManager.OnHealthChanged -= action;
+    }
+
+    // Gets the character's skills
+    public List<SkillAction> GetSkills()
+    {
+        return _characterData.MySkills;
+    }
+
+    // Deals damage to the character
+    public bool DealDamage(float dmgAmt)
+    {
+        _healthManager.DealDamage(dmgAmt);
+
+        // Raises the OnDamageTakenEvent
+        EventBus<OnDamageTakenEvent>.Raise(new OnDamageTakenEvent
+        {
+            HitCharacter = transform,
+            CharacterModel = this,
+            DamageAmt = dmgAmt,
+            CurrentHealth = _healthManager.CurrentHealth,
+            MaxHealth = _healthManager.MaxHealth,
+        });
+
+        // Handles character death
+        if (_healthManager.CurrentHealth <= 0)
+        {
+            gameObject.SetActive(false);
+            NotifyDeath();
+        }
+
+        return true; // Returns true if damage is dealt successfully
+    }
+
+    // Deals damage from a status effect
+    public void DealStatusEffectDamage(float dmgAmt)
+    {
+        _healthManager.DealDamage(dmgAmt);
+
+        // Raises the OnStatusEffectDamageTakenEvent
+        EventBus<OnStatusEffectDamageTakenEvent>.Raise(new OnStatusEffectDamageTakenEvent
+        {
+            HitCharacter = transform,
+            CharacterModel = this,
+            DamageAmt = dmgAmt,
+            CurrentHealth = _healthManager.CurrentHealth,
+            MaxHealth = _healthManager.MaxHealth,
+        });
+
+        // Handles character death
+        if (_healthManager.CurrentHealth <= 0)
+        {
+            gameObject.SetActive(false);
+            NotifyDeath();
+        }
+    }
+
+    // Notifies that the character has died
+    void NotifyDeath()
+    {
+        // Raises the OnDeathEvent
+        EventBus<OnDeathEvent>.Raise(new OnDeathEvent
+        {
+            DiedCharacter = transform,
+        });
+    }
+
+    // Inflicts a status effect on the character
+    public void InflictStatusEffect(StatusEffect statusEffect, int stacks)
+    {
+        _statusEffectManager.InflictStatusEffect(statusEffect, stacks);
+    }
+
+    // Gets the character's base damage
+    public float GetBaseDmg()
+    {
+        return 1;
+    }
+
+    // Gets the character's final speed
+    public float GetFinalSpeed()
+    {
+        return _characterData.Speed;
+    }
+
+    // Gets the character's current health
+    public float GetHealth()
+    {
+        return _healthManager.CurrentHealth;
+    }
+}
+
+// Represents the presenter for a character
+public abstract class CharacterPresenter : MonoBehaviour
+{
+    // Character model
+    [SerializeField] protected CharacterModel _characterModel;
+
+    // Called when the character's turn starts
+    public abstract void OnCharacterTurnStart();
+
+    // Called when the character's turn ends
+    public abstract void OnCharacterTurnEnd();
+
+    // Called when a skill is used
+    public void OnSkillUsed()
+    {
+        OnCharacterTurnEnd();
+        TurnManager.instance.NextCharactersTurn();
+    }
+
+    // Gets the character's final speed
+    public float GetFinalSpeed()
+    {
+        return _characterModel.GetFinalSpeed();
+    }
+}
+
+// Represents the model for an enemy character
+public class EnemyModel : CharacterModel
+{
+    // Queues up a skill for the enemy
+    public void QueueUpSkill()
+    {
+        CharacterModel target = TargetManager.SelectedPlayerTarget;
+        if (_characterData.MySkills.Count <= 0) return;
+
+        // Adds an action to the ActionManager to execute the skill
+        ActionManager.instance.AddAction(() =>
+        {
+            _characterData.MySkills[Random.Range(0, _characterData.MySkills.Count)].Execute(this, () => TargetManager.GetTargetOrAvailableTarget(target));
+        });
+    }
+}
+
+// Represents the presenter for an enemy character
+public class EnemyPresenter : CharacterPresenter
+{
+    // Enemy model
+    private EnemyModel _enemyModel;
+
+    // Initializes the presenter
+    protected override void Start()
+    {
+        base.Start();
+        _enemyModel = _characterModel as EnemyModel;
+    }
+
+    // Called when the enemy's turn starts
+    public override void OnCharacterTurnStart()
+    {
+        _enemyModel.QueueUpSkill();
+        TurnManager.instance.NextCharactersTurn();
+    }
+
+    // Called when the enemy's turn ends
+    public override void OnCharacterTurnEnd()
+    {
+        // Do nothing
+    }
+}
+
+// Represents the model for a player character
+public class PlayerModel : CharacterModel
+{
+    // No additional implementation needed
+}
+
+// Represents the presenter for a player character
+public class PlayerPresenter : CharacterPresenter
+{
+    // Character skill view
+    [SerializeField] protected CharacterSkillView _characterSkillView;
+
+    // Initializes the presenter
+    protected override void Start()
+    {
+        base.Start();
+        InitializeView();
+    }
+
+    // Initializes the view
+    void InitializeView()
+    {
+        _characterSkillView.InitializeView(this);
+        List<SkillAction> mySkills = _characterModel.GetSkills();
+        _characterSkillView?.InstantiateSkillButtons(mySkills, _characterModel);
+    }
+
+    // Called when the player's turn starts
+    public override void OnCharacterTurnStart()
+    {
+        _characterSkillView.SetSkillsVisible(true);
+    }
+
+    // Called when the player's turn ends
+    public override void OnCharacterTurnEnd()
+    {
+        _characterSkillView.SetSkillsVisible(false);
+    }
+}

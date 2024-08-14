@@ -21,6 +21,7 @@ public class StatusEffectManager : MonoBehaviour
     private void Awake() {
         _characterModel = GetComponent<CharacterModel>();
 
+        // Register event bindings
         _onTurnStart = new EventBinding<OnTurnStart>((OnTurnStart turnStart) => ExecuteStatusEffects(StatusEffectTrigger.OnTurnStart));
         EventBus<OnTurnStart>.Register(_onTurnStart);
         _onDamageTaken = new EventBinding<OnDamageTakenEvent>((OnDamageTakenEvent onDamageTakenEvent) => {
@@ -58,9 +59,9 @@ public class StatusEffectManager : MonoBehaviour
     }
 
     void ExecuteStatusEffects(StatusEffectTrigger trigger, CharacterModel targetModel = null){
-        //If targetModel is NOT null then check if this is the targetModel. Only run below if it is
-        //Check if this is the character that was hit
+        //// Check if this is the target model
         if(targetModel != null && targetModel != _characterModel) return;
+        // Check if there are any status effects to execute for the trigger event
         if(!_statusEffectsDatas.ContainsKey(trigger)) return;
 
         //Finally, execute all the status effects in the respective trigger key
@@ -91,7 +92,7 @@ public class StatusEffectManager : MonoBehaviour
         }
     }
 
-    //Will return the StatusEffectData object that contains the targetted statusEffect.
+    // Finds a status effect by the type of trigger event that'll fire/execute it
     StatusEffectData FindStatusEffectByType(List<StatusEffectData> statusEffectDatas, StatusEffect targetStatusEffect){
         foreach(var statusEffectData in statusEffectDatas){
             if(statusEffectData.StatusEffect.GetType() == targetStatusEffect.GetType()) return statusEffectData;
@@ -99,6 +100,7 @@ public class StatusEffectManager : MonoBehaviour
         return null;
     }
     
+    // Gets all status effects on the character
     public List<StatusEffectData> GetMyStatusEffects(){
         List<StatusEffectData> statusEffects = new List<StatusEffectData>();
         foreach(StatusEffectTrigger trigger in Enum.GetValues(typeof(StatusEffectTrigger))){
