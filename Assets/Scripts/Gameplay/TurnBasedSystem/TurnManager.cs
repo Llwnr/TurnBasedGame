@@ -15,6 +15,8 @@ public class TurnManager : MonoBehaviour
         }
 
         Debug.Log("Resetting leantween from here");
+        Debug.Log("Setting application frame rate here");
+        Application.targetFrameRate = 30;
         LeanTween.reset();
     }
 

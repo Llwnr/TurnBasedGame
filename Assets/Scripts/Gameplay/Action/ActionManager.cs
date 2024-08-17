@@ -11,35 +11,31 @@ public class ActionManager : MonoBehaviour
         if(instance == null) instance = this;
         else Debug.LogError("More than 1 ActionManager");
     }
-    private List<Action> _actions = new List<Action>();
+    private List<Func<Task>> _actions = new List<Func<Task>>();
     
-    public void AddAction(Action action){
+    public void AddAction(Func<Task> action){
         _actions.Add(action);
     }
     public void RemoveLastAction(){
-        _actions.Remove(GetLastItem(_actions));
+        _actions.Remove(_actions[0]);
     }
 
     private void Update() {
         if(Input.GetKeyDown(KeyCode.X)){
             Debug.Log("X key pressed");
-            ExecutePlayerActions();
+            ExecuteQueueActions();
         }
     }
 
-    async void ExecutePlayerActions(){
+    async void ExecuteQueueActions(){
         while(_actions.Count > 0){
-            GetLastItem(_actions).Invoke();
+            Func<Task> skillAction = _actions[0];
+            await skillAction.Invoke();//Wait for the skill, its animations and all to be activated
             RemoveLastAction();
-            await Task.Delay(1000);
         }
         if(_actions.Count <= 0){
             await Task.Delay(1000);
             TurnManager.instance.SetNextGameTurn();
         }
-    }
-
-    Action GetLastItem(List<Action> actions){
-        return actions[actions.Count-1];
     }
 }

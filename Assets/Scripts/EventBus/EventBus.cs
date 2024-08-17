@@ -14,7 +14,7 @@ namespace LlwnrEventBus
         public static void Raise(T @event){
             //Add events to queue for sequential execution in proper order
             EventQueue.AddEventToQueue(() => {
-                Debug.Log("Firing: " + @event.GetType());
+                // Debug.Log("Firing: " + @event.GetType());
                 foreach (var binding in bindings)
                 {
                     binding.OnEvent.Invoke(@event);
@@ -38,11 +38,9 @@ namespace LlwnrEventBus
             EventRaisingAction.Enqueue(action); 
         }
 
-        public static async void ProcessEvents(){
+        public static void ProcessEvents(){
             if(isBusy) return;
             isBusy = true;
-            await Task.Yield();
-
             while(EventRaisingAction.Count > 0){
                 EventRaisingAction.Dequeue()?.Invoke();
             }

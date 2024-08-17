@@ -1,26 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
-
-[Serializable]
-//Data for inflicting a status effect when the skill hits
-public class EffectInflictData{
-    public StatusEffect StatusEffect;
-    public int StacksToApply = 1;
-}
 
 public abstract class SkillAction : ScriptableObject
 {
     public List<EffectInflictData> SelfStatusEffects, EnemyStatusEffects;
-    public bool isAoe = false;
+    public bool IsAoe = false;
+    public Sprite Icon;
     [TextArea(3,10)]
     public string Description;
-    public void Execute(CharacterModel skillUser, Func<CharacterModel> targetFinder){
+    public float SkillDmgMultiplier;
+    public AnimationClip SkillAnim;
+    public async Task Execute(CharacterModel skillUser, Func<CharacterModel> targetFinder){
         //DONT EXECUTE SKILL IF THE SKILL USER IS DEAD, cuz dead ppl cant attack
         if(!skillUser.gameObject.activeSelf) return;
+        Vector2 origPos = skillUser.transform.position;
         CharacterModel target = targetFinder.Invoke();
-        if(!isAoe){
+        await Task.Delay(200);
+        //Move to target
+        await MoveToTarget(skillUser.transform, target.transform);
+        //Start animation
+        await AnimationManager.instance.PlayAnimation(SkillAnim.name, target.transform.position);
+        if(!IsAoe){
             ExecuteSkill(skillUser, target);
             InflictSelfEffects(skillUser);
         }else{
@@ -35,8 +38,17 @@ public abstract class SkillAction : ScriptableObject
                 }
             }
         }
+        skillUser.transform.position = origPos;
+        return;
     }
     public abstract void ExecuteSkill(CharacterModel skillUser, CharacterModel target);
+
+    async Task MoveToTarget(Transform self, Transform target){
+        while(Vector2.Distance(self.position, target.position)>1.5f){
+            self.position += (target.position-self.position).normalized*0.4f;
+            await Task.Yield();
+        }
+    }
 
     //This will apply to the user
     void InflictSelfEffects(CharacterModel skillUser){
@@ -50,4 +62,11 @@ public abstract class SkillAction : ScriptableObject
             target.InflictStatusEffect(statusEffectData.StatusEffect, statusEffectData.StacksToApply);
         }
     }
+}
+
+[Serializable]
+//Data for inflicting a status effect when the skill hits
+public class EffectInflictData{
+    public StatusEffect StatusEffect;
+    public int StacksToApply = 1;
 }

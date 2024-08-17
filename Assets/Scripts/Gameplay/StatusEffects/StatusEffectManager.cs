@@ -14,7 +14,7 @@ public class StatusEffectManager : MonoBehaviour
     //Manage various status effects execution causes
     //For example, when a turn starts, execute the _statusEffects related to it
     EventBinding<OnTurnStart> _onTurnStart;
-    EventBinding<OnDamageTakenEvent> _onDamageTaken;
+    EventBinding<OnSkillDamageTakenEvent> _onDamageTaken;
     //To notify when a status effect is added, removed or changed
     public event Action<StatusEffectData> OnStatusEffectAdded, OnStatusEffectRemoved, OnStatusEffectUpdated;
 
@@ -24,15 +24,15 @@ public class StatusEffectManager : MonoBehaviour
         // Register event bindings
         _onTurnStart = new EventBinding<OnTurnStart>((OnTurnStart turnStart) => ExecuteStatusEffects(StatusEffectTrigger.OnTurnStart));
         EventBus<OnTurnStart>.Register(_onTurnStart);
-        _onDamageTaken = new EventBinding<OnDamageTakenEvent>((OnDamageTakenEvent onDamageTakenEvent) => {
+        _onDamageTaken = new EventBinding<OnSkillDamageTakenEvent>((OnSkillDamageTakenEvent onDamageTakenEvent) => {
             ExecuteStatusEffects(StatusEffectTrigger.OnDamageTakenEvent, onDamageTakenEvent.CharacterModel);
         });
-        EventBus<OnDamageTakenEvent>.Register(_onDamageTaken);
+        EventBus<OnSkillDamageTakenEvent>.Register(_onDamageTaken);
     }
 
     private void OnDestroy() {
         EventBus<OnTurnStart>.Deregister(_onTurnStart);
-        EventBus<OnDamageTakenEvent>.Deregister(_onDamageTaken);
+        EventBus<OnSkillDamageTakenEvent>.Deregister(_onDamageTaken);
     }
 
     public void InflictStatusEffect(StatusEffect statusEffect, int stacks){

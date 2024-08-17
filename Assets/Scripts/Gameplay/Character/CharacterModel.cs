@@ -32,7 +32,7 @@ public abstract class CharacterModel : MonoBehaviour
     public bool DealDamage(float dmgAmt){
         _healthManager.DealDamage(dmgAmt);
 
-        EventBus<OnDamageTakenEvent>.Raise(new OnDamageTakenEvent{
+        EventBus<OnSkillDamageTakenEvent>.Raise(new OnSkillDamageTakenEvent{
             HitCharacter = transform,
             CharacterModel = this,
             DamageAmt = dmgAmt,
@@ -46,7 +46,7 @@ public abstract class CharacterModel : MonoBehaviour
         }
         return true;//Returns true if damage is dealt successfully to this character
     }
-    public void DealStatusEffectDamage(float dmgAmt){
+    public void DealStatusEffectDamage(StatusEffect statusEffect, float dmgAmt){
         _healthManager.DealDamage(dmgAmt);
 
         EventBus<OnStatusEffectDamageTakenEvent>.Raise(new OnStatusEffectDamageTakenEvent{
@@ -55,6 +55,7 @@ public abstract class CharacterModel : MonoBehaviour
             DamageAmt = dmgAmt,
             CurrentHealth = _healthManager.CurrentHealth,
             MaxHealth = _healthManager.MaxHealth,
+            StatusEffect = statusEffect,
         });
         //MANAGING WHEN A CHARACTER DIES
         if(_healthManager.CurrentHealth <= 0){
@@ -67,6 +68,8 @@ public abstract class CharacterModel : MonoBehaviour
         EventBus<OnDeathEvent>.Raise(new OnDeathEvent{
             DiedCharacter = transform,
         });
+
+        Destroy(_statusEffectManager);
     }
 
     //STATUS EFFECT PART

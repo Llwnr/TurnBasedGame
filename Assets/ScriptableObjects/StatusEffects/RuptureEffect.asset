@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: RuptureEffect
   m_EditorClassIdentifier: 
   TriggerType: 1
+  Name: Rupture
   Description: 'Deal 3*x dmg each time you get hit.
 
     Reduce stacks by 50%'

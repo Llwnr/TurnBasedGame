@@ -8,7 +8,7 @@ public class BurnEffect : StatusEffect
 
     public override void Execute(CharacterModel targetModel, int stacks)
     {
-        targetModel.DealStatusEffectDamage(burnDmg*stacks);
+        targetModel.DealStatusEffectDamage(this, burnDmg*stacks);
     }
 
     public override int DecreaseStacks(int stacks)

@@ -8,7 +8,7 @@ public class RuptureEffect : StatusEffect
 
     public override void Execute(CharacterModel targetModel, int stacks)
     {
-        targetModel.DealStatusEffectDamage(ruptureDmg*stacks);
+        targetModel.DealStatusEffectDamage(this, ruptureDmg*stacks);
     }
 
     public override int DecreaseStacks(int stacks)

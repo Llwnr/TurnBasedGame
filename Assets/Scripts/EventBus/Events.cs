@@ -17,16 +17,18 @@ namespace LlwnrEventBus{
         public StatusEffectManager StatusEffectManager;
     }
     //When a character takes damage, fired by CharacterModel
-    public struct OnDamageTakenEvent : IEvent{
+    public struct OnSkillDamageTakenEvent : IEvent{
         public Transform HitCharacter;
         public CharacterModel CharacterModel;
         public float DamageAmt, CurrentHealth, MaxHealth;
+        public SkillAction Skill;
     }
     //When a character takes status effect related damage
     public struct OnStatusEffectDamageTakenEvent : IEvent{
         public Transform HitCharacter;
         public CharacterModel CharacterModel;
         public float DamageAmt, CurrentHealth, MaxHealth;
+        public StatusEffect StatusEffect;
     }
     //When a character dies, fired by CharacterModel
     public struct OnDeathEvent : IEvent{

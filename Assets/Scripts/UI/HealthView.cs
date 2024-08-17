@@ -28,4 +28,8 @@ public class HealthView : MonoBehaviour
     void UpdateHealthBar(float currHealth, float maxHealth){
         _healthBar.fillAmount = currHealth/maxHealth;
     }
+
+    private void LateUpdate() {
+        AlignToModelPos();
+    }
 }

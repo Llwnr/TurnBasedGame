@@ -10,7 +10,6 @@ public static class TargetManager
             return _playerTargetModel;
         }
         set{
-            if(value == null) return;
             _playerTargetModel = value;
             OnPlayerTargetChange.Invoke(_playerTargetModel.transform);
         }
@@ -20,7 +19,6 @@ public static class TargetManager
             return _enemyTargetModel;
         }
         set{
-            if(value == null) return;
             _enemyTargetModel = value;
             OnEnemyTargetChange.Invoke(_enemyTargetModel.transform);
         }
@@ -34,6 +32,10 @@ public static class TargetManager
         if(!target || !target.gameObject.activeSelf){
             if(target is PlayerModel)   target = SelectedPlayerTarget;
             else if(target is EnemyModel) target = SelectedEnemyTarget;
+        }
+        //If no target is available then send an error
+        if(target == null){
+            Debug.LogError("No target found for " + target.GetType());
         }
         return target;
     }
