@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 387e2f9308a0734479e9b682689dd2bb, type: 3}
   m_Name: BasicSkill1
   m_EditorClassIdentifier: 
-  SelfStatusEffects: []
+  SelfStatusEffects:
+  - StatusEffect: {fileID: 11400000, guid: 978733d72e630f046870dff1bc783caa, type: 2}
+    StacksToApply: 2
   EnemyStatusEffects:
   - StatusEffect: {fileID: 11400000, guid: 978733d72e630f046870dff1bc783caa, type: 2}
     StacksToApply: 3

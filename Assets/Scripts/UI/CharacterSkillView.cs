@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -42,43 +43,55 @@ public class CharacterSkillView : MonoBehaviour
         });
     }
 
-    //Display the description on button hover
+    //Display the description box on skill button hover
     public void SetOnHoverDescriptionBox(Button btn, SkillAction skillData){
-        EventTrigger eventTrigger = btn.gameObject.AddComponent<EventTrigger>();
+        EventTrigger btnEventTrigger = btn.gameObject.AddComponent<EventTrigger>();
         btn.onClick.AddListener(() => ClearDescription());
 
         EventTrigger.Entry pointerEnterEntry = new EventTrigger.Entry(){eventID = EventTriggerType.PointerEnter};
         pointerEnterEntry.callback.AddListener((data) => { 
             float xOffset = btn.GetComponent<RectTransform>().rect.width*0.5f + _descriptionBox.GetComponent<RectTransform>().rect.width*0.5f;
-            DisplayDescription(skillData, btn.transform.position+new Vector3(xOffset,0,0)); 
+            float yOffset = btn.GetComponent<RectTransform>().rect.height*0.5f + _descriptionBox.GetComponent<RectTransform>().rect.height*0.5f;
+            // Child of btn so hover works across both btn and its descriptionBox.
+            _descriptionBox.transform.SetParent(btn.transform, false);
+            DisplayDescription(skillData, btn.transform.position+new Vector3(0,yOffset,0)); 
         });
-        eventTrigger.triggers.Add(pointerEnterEntry);
+        btnEventTrigger.triggers.Add(pointerEnterEntry);
 
         EventTrigger.Entry pointerExitEntry = new EventTrigger.Entry(){eventID = EventTriggerType.PointerExit};
         pointerExitEntry.callback.AddListener((data) => { ClearDescription(); });
-        eventTrigger.triggers.Add(pointerExitEntry);
+        btnEventTrigger.triggers.Add(pointerExitEntry);
     }
 
+    // Displays the description box with the given skill data.
     void DisplayDescription(SkillAction skillData, Vector2 screenPos){
         string description = skillData.Description;
-        //Change description to include the data about the skill
+        // Add descriptions for status effects inflicted by the skill.
         description = AddStatusEffectInflictDescription(description);
-        description = KeywordsStylizer.GetStylizedString(description);
-        string dmgAmtToString = $"<color=red><size=120%><font=\"{KeywordsStylizer.slugfest_font}\">" + skillData.SkillDmgMultiplier.ToString() + "</font></size></color>";
+        // Stylize the description using KeywordsDescriptionStylizer.
+        description = KeywordsDescriptionStylizer.GetStylizedString(description);
+        // Replace "/dmg/" in the description with the skill's damage multiplier.
+        string dmgAmtToString = $"<color=red><size=120%><font=\"{KeywordsDescriptionStylizer.Goodtimes_font}\">" + skillData.SkillDmgMultiplier.ToString() + "</font></size></color>";
         description = Regex.Replace(description, "/dmg/", dmgAmtToString);
 
-        //Creating the description box
+        // Initialize and display the description box.
         _descriptionBox.Initialize(skillData.name, description, null);
         _descriptionBox.transform.position = screenPos;
         _descriptionBox.gameObject.SetActive(true);
 
-        //Describe all the status effects to be inflicted by the skill
+        //Make the description box not activate the parent when it(desc box is clicked)
+        EventTrigger descClickEvent = _descriptionBox.gameObject.AddComponent<EventTrigger>();
+        EventTrigger.Entry pointerDownEntry = new EventTrigger.Entry(){eventID = EventTriggerType.PointerDown};
+        pointerDownEntry.callback.AddListener((data) => {});
+        descClickEvent.triggers.Add(pointerDownEntry);
+
+        // Helper function to add descriptions for status effects.
         string AddStatusEffectInflictDescription(string desc){
-            foreach(var statusEffectData in skillData.SelfStatusEffects){
-                desc += "\n"+"Inflicts "+statusEffectData.StatusEffect.Name+" x" + statusEffectData.StacksToApply.ToString() + " to self";
+            foreach (var statusEffectData in skillData.SelfStatusEffects){
+                desc += "\n" + "Inflicts " + statusEffectData.StatusEffect.Name + " x" + statusEffectData.StacksToApply.ToString() + " to self";
             }
-            foreach(var statusEffectData in skillData.EnemyStatusEffects){
-                desc += "\n"+"Inflicts "+statusEffectData.StatusEffect.Name+" x" + statusEffectData.StacksToApply.ToString() + " to target";
+            foreach (var statusEffectData in skillData.EnemyStatusEffects){
+                desc += "\n" + "Inflicts " + statusEffectData.StatusEffect.Name + " x" + statusEffectData.StacksToApply.ToString() + " to target";
             }
             return desc;
         }
