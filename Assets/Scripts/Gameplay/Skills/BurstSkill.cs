@@ -8,7 +8,7 @@ public class BurstSkill : SkillAction
 {
     public override void ExecuteSkill(CharacterModel skillUser, CharacterModel target)
     {
-        if(target.DealDamage(skillUser.GetBaseDmg() * SkillDmgMultiplier)){
+        if(target.DealDamage(skillUser.GetBaseDmgMod() * SkillDmgMultiplier)){
             InflictEffectsToTarget(target);
         }
     }

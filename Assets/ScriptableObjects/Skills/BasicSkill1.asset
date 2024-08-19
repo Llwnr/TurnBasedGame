@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 387e2f9308a0734479e9b682689dd2bb, type: 3}
   m_Name: BasicSkill1
   m_EditorClassIdentifier: 
-  SelfStatusEffects:
-  - StatusEffect: {fileID: 11400000, guid: 978733d72e630f046870dff1bc783caa, type: 2}
-    StacksToApply: 2
+  SelfStatusEffects: []
   EnemyStatusEffects:
   - StatusEffect: {fileID: 11400000, guid: 978733d72e630f046870dff1bc783caa, type: 2}
     StacksToApply: 3
+  - StatusEffect: {fileID: 11400000, guid: 156a94b1a8ff4684c8cba26100b80e4a, type: 2}
+    StacksToApply: 2
   IsAoe: 0
   Icon: {fileID: 21300000, guid: 51a2f87fc60014745be18bee16d63f39, type: 3}
   Description: Deals /dmg/ dmg to a single enemy.
-  SkillDmgMultiplier: 15
+  SkillDmgMultiplier: 8
   SkillAnim: {fileID: 7400000, guid: e253be67dd1af02499b1764f9d777ef3, type: 2}

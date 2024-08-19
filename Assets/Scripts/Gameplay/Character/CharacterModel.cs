@@ -6,7 +6,7 @@ using LlwnrEventBus;
 
 public abstract class CharacterModel : MonoBehaviour
 {
-    [SerializeField]protected CharacterData _characterData;
+    [SerializeField]protected CharacterStatsData _characterData;
     [SerializeField]protected StatusEffectManager _statusEffectManager;
     //For Health Management
     private HealthManager _healthManager;
@@ -78,13 +78,23 @@ public abstract class CharacterModel : MonoBehaviour
     }
     
     //DATA PART
-    public float GetBaseDmg(){
-        return 1;
+    public float GetBaseDmgMod(){
+        return _characterData.AttackMultiplier;
+    }
+    public float GetFinalDmgMod(){
+        return StatsManager.GetFinalData(_characterData, _statusEffectManager).AttackMultiplier;
     }
     public float GetFinalSpeed(){
         return _characterData.Speed;
     }
     public float GetHealth(){
         return _healthManager.CurrentHealth;
+    }
+    public CharacterStatsData GetBaseStatsData(){
+        //NEVER MODIFY THIS DIRECTLY
+        return _characterData;
+    }
+    public StatusEffectManager GetStatusEffectManager(){
+        return _statusEffectManager;
     }
 }

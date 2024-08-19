@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class TargetManager
@@ -11,7 +10,7 @@ public static class TargetManager
         }
         set{
             _playerTargetModel = value;
-            OnPlayerTargetChange.Invoke(_playerTargetModel.transform);
+            OnPlayerTargetChange?.Invoke(_playerTargetModel.transform);
         }
     }
     public static CharacterModel SelectedEnemyTarget{
@@ -20,7 +19,7 @@ public static class TargetManager
         }
         set{
             _enemyTargetModel = value;
-            OnEnemyTargetChange.Invoke(_enemyTargetModel.transform);
+            OnEnemyTargetChange?.Invoke(_enemyTargetModel.transform);
         }
     }
     public static event Action<Transform> OnPlayerTargetChange;
@@ -42,14 +41,20 @@ public static class TargetManager
     
     //Let target setters to set the player targets and enemy targets
     public static void NonTargetClicked(){
-        OnEmptyTargetClicked.Invoke();
+        OnEmptyTargetClicked?.Invoke();
     }
     public static void SetPlayerTargetModel(CharacterModel target){
-        if(target==null) return;
+        if(target==null){
+            Debug.LogWarning("Null player model to be set as target");
+            return;
+        }
         SelectedPlayerTarget = target;
     }
     public static void SetEnemyTargetModel(CharacterModel target){
-        if(target==null) return;
+        if(target==null){
+            Debug.LogWarning("Null player model to be set as target");
+            return;
+        }
         SelectedEnemyTarget = target;
     }
     public static PlayerModel[] GetAllPlayerModels(){

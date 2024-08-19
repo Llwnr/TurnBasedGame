@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "RuptureEffect", menuName = "StatusEffects/RuptureEffect")]
-public class RuptureEffect : StatusEffect
+public class RuptureEffect : AnomalyEffect
 {
     public float ruptureDmg;
 

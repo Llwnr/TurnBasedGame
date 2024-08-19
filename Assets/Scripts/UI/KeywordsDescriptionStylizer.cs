@@ -12,15 +12,16 @@ public static class KeywordsDescriptionStylizer
     public static Dictionary<string, string> StylizedReplacements = new Dictionary<string, string>(){
         {"Poison", $"<color=green><font=\"{Goodtimes_font}\">Poison</font></color>"},
         {"Burn", $"<color=orange><font=\"{Goodtimes_font}\">Burn</font></color>"},
-        {"Rupture", $"<color=green><font=\"{Goodtimes_font}\">Rupture</font></color>"}
+        {"Rupture", $"<color=green><font=\"{Goodtimes_font}\">Rupture</font></color>"},
+        {"AttackBuff", $"<color=green><font=\"{Goodtimes_font}\">AttackBuff</font></color>"}
     };
 
     static KeywordsDescriptionStylizer(){
-        SetKeywordsDescription();
+        SetStatusEffectsKeywordsDescription();
     }
     //Populate status effects description dictionary
     [InitializeOnEnterPlayMode]
-    public static void SetKeywordsDescription(){
+    public static void SetStatusEffectsKeywordsDescription(){
         StatusEffectsDescription.Clear();
         StatusEffect[] allStatusEffects = Resources.LoadAll<StatusEffect>("ScriptableObjects/StatusEffects");
         Debug.Log("Mapping status effects name to description");

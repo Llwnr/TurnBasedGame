@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BurnEffect", menuName = "StatusEffects/BurnEffect")]
-public class BurnEffect : StatusEffect
+public class BurnEffect : AnomalyEffect
 {
     public float burnDmg;
 

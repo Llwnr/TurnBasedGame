@@ -49,7 +49,10 @@ public class StatusEffectManager : MonoBehaviour
             };
             _statusEffectsDatas[statusEffect.TriggerType].Add(myStatusEffect);
         }
-        myStatusEffect.AddStacks(stacks); 
+        //If AnomalyType effect then add stacks
+        if(myStatusEffect.StatusEffect is AnomalyEffect)  myStatusEffect.AddStacks(stacks);
+        //If StatModifier type then just reset the duration of stacks
+        if(myStatusEffect.StatusEffect is StatsModificationEffect)  myStatusEffect.SetStacks(stacks); 
         //Notify whether the status effect was added or updated
         if(dataExists){
             OnStatusEffectUpdated?.Invoke(myStatusEffect);
@@ -101,7 +104,7 @@ public class StatusEffectManager : MonoBehaviour
     }
     
     // Gets all status effects on the character
-    public List<StatusEffectData> GetMyStatusEffects(){
+    public List<StatusEffectData> GetAllStatusEffects(){
         List<StatusEffectData> statusEffects = new List<StatusEffectData>();
         foreach(StatusEffectTrigger trigger in Enum.GetValues(typeof(StatusEffectTrigger))){
             if (_statusEffectsDatas.TryGetValue(trigger, out List<StatusEffectData> effects)) {
@@ -109,6 +112,14 @@ public class StatusEffectManager : MonoBehaviour
             }
         }
         return statusEffects;
+    }
+    public List<StatusEffectData> GetStatModifiers(){
+        List<StatusEffectData> statusEffects = GetAllStatusEffects();
+        List<StatusEffectData> statModEffects = new List<StatusEffectData>();
+        foreach(var data in statusEffects){
+            if(data.StatusEffect is StatsModificationEffect) statModEffects.Add(data);
+        }
+        return statModEffects;
     }
 }
 
