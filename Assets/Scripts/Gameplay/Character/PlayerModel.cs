@@ -9,7 +9,7 @@ public class PlayerModel : CharacterModel
     public StatLinkerModel GetStatLinkerModel(){
         return _statLinkerModel;
     }
-    public new bool DealSkillDamage(float dmgAmt, bool dealLinkedDmg = true)
+    public override bool DealSkillDamage(float dmgAmt, bool dealLinkedDmg = true)
     {
         bool dmgDealtSuccesfully = base.DealSkillDamage(dmgAmt, dealLinkedDmg);
         if(dealLinkedDmg) _statLinkerModel.DealDmgToAllLinkedPlayers(dmgAmt);

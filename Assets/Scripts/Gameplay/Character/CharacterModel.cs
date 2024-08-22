@@ -30,7 +30,7 @@ public abstract class CharacterModel : MonoBehaviour, IDamagable
     public List<SkillAction> GetSkills(){
         return _characterData.MySkills;
     }
-    public bool DealSkillDamage(float dmgAmt, bool dealLinkedDmg = true){
+    public virtual bool DealSkillDamage(float dmgAmt, bool dealLinkedDmg = true){
         _healthManager.DealDamage(dmgAmt);
         RaiseSkillDmgTakenEvent(dmgAmt);
         DeathOnEmptyHealth();
