@@ -17,13 +17,11 @@ public class PlayerPresenter : CharacterPresenter
         _characterSkillView?.InstantiateSkillButtons(mySkills, _characterModel);
     }
 
-    public override void OnCharacterTurnStart()
-    {
+    public override void OnCharacterTurnStart(){
         _characterSkillView.SetSkillsVisible(true);
     }
 
-    public override void OnCharacterTurnEnd()
-    {
+    public override void OnCharacterTurnEnd(){
         _characterSkillView.SetSkillsVisible(false);
     }
 }

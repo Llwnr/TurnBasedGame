@@ -40,19 +40,19 @@ public class TurnManager : MonoBehaviour
         
         Debug.Log("Num of charas this round: " + _turnQueue.Count);
         NextCharactersTurn();
-        
     }
 
     public void NextCharactersTurn(){
         if(_turnQueue.Count <= 0){
             return;
         }
+        //Keep looking through only active characters to display their skill buttons
         _currentPresenter = _turnQueue.Dequeue();
         _currentPresenter.OnCharacterTurnStart();
     }
 
     public void SetNextGameTurn(){
-        QueueTurn();
         EventBus<OnTurnStart>.Raise(new OnTurnStart{});
+        QueueTurn();
     }
 }

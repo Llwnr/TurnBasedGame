@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public abstract class CharacterPresenter : MonoBehaviour
@@ -16,7 +17,5 @@ public abstract class CharacterPresenter : MonoBehaviour
         OnCharacterTurnEnd();
         TurnManager.instance.NextCharactersTurn();
     }
-    public float GetFinalSpeed(){
-        return _characterModel.GetFinalSpeed();
-    }
+    public float GetFinalSpeed() =>  _characterModel.GetFinalSpeed();
 }

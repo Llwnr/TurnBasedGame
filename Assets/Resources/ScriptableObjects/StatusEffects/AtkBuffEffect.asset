@@ -16,5 +16,5 @@ MonoBehaviour:
   Name: AttackBuff
   Description: Uhh what is going on
   Icon: {fileID: 21300000, guid: 0779ad3feec52124e97114bcbb12ef13, type: 3}
-  AtkBuff: 0.25
+  AtkBuff: 0.8
   ModifierType: 0

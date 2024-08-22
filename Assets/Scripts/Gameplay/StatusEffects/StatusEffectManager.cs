@@ -121,6 +121,14 @@ public class StatusEffectManager : MonoBehaviour
         }
         return statModEffects;
     }
+    public StatusEffectData GetStatusEffectData(StatusEffect statusEffect){
+        foreach(StatusEffectData data in GetAllStatusEffects()){
+            if(data.StatusEffect.GetType() == statusEffect.GetType()){
+                return data;
+            }
+        }
+        return null;
+    }
 }
 
 

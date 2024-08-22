@@ -13,19 +13,15 @@ public abstract class SkillAction : ScriptableObject
     public string Description; // Description of the skill
     public float SkillDmgMultiplier; // Damage multiplier for the skill
     public AnimationClip SkillAnim; // Animation clip for the skill
-    protected CharacterStatsData _skillUserFinalData; // Final calculated stats of the skill user
 
     // Executes the skill action
     public async Task Execute(CharacterModel skillUser, Func<CharacterModel> targetFinder){
         // Don't execute if the skill user is dead
         if(!skillUser.gameObject.activeSelf) return;
 
-        // Calculate the skill user's final stats
-        _skillUserFinalData = StatsManager.GetFinalData(skillUser.GetBaseStatsData(), skillUser.GetStatusEffectManager());
-
         Vector2 origPos = skillUser.transform.position;
         CharacterModel target = targetFinder.Invoke();
-        await Task.Delay(200);
+        await Task.Delay(300);
 
         // Move to the target
         await MoveToTarget(skillUser.transform, target.transform);

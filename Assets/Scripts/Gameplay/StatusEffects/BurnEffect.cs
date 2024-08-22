@@ -13,7 +13,7 @@ public class BurnEffect : AnomalyEffect
 
     public override int DecreaseStacks(int stacks)
     {
-        stacks = Mathf.FloorToInt(stacks*0.5f);
+        stacks = Mathf.FloorToInt(stacks*0.7f);
         //Decrease the stacks then return the result
         return stacks;
     }

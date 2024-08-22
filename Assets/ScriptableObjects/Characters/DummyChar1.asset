@@ -15,9 +15,10 @@ MonoBehaviour:
   Name: 
   Description: 
   MaxHealth: 100
-  AttackMultiplier: 1
-  DefenseMultiplier: 1
-  Speed: 5
+  CharacterStats:
+    Attack: 1
+    Defense: 1
+    Speed: 2
   MySkills:
   - {fileID: 11400000, guid: b9a83265bbcd7ea419403023307cbe75, type: 2}
   - {fileID: 11400000, guid: 5559b46bd4213a546a2bad9bfbc20313, type: 2}

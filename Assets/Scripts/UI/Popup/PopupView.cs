@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LlwnrEventBus;
@@ -14,6 +15,8 @@ public class PopupView : MonoBehaviour
     EventBinding<OnSkillDamageTakenEvent> _onDamageTaken;
     EventBinding<OnStatusEffectDamageTakenEvent> _onSEDamageTakenEvent;
 
+    private Dictionary<CharacterModel, Queue<Action>> _dmgPopupQueue = new Dictionary<CharacterModel, Queue<Action>>();
+    private bool _queueRunning = false;
     private void OnEnable() {
         _onDamageTaken = new EventBinding<OnSkillDamageTakenEvent>(CreateSkillDmgPopup);
         EventBus<OnSkillDamageTakenEvent>.Register(_onDamageTaken);
@@ -27,16 +30,41 @@ public class PopupView : MonoBehaviour
     }
 
     void CreateSkillDmgPopup(OnSkillDamageTakenEvent eventData){
-        CreatePopup(eventData.HitCharacter.position)
+        AddPopupCreationToQueue(eventData.CharacterModel, () => {
+            CreatePopup(eventData.HitCharacter.position)
             .Initialize(eventData.DamageAmt.ToString(), null)
             .AnimatePopup(80, 0.5f, 1.2f);
-        
+        });
     }
-    async void CreateStatusEffectDmgPopup(OnStatusEffectDamageTakenEvent eventData){
-        await Task.Delay(30);
-        CreatePopup(eventData.HitCharacter.position)
+    void CreateStatusEffectDmgPopup(OnStatusEffectDamageTakenEvent eventData){
+        AddPopupCreationToQueue(eventData.CharacterModel, () => {
+            CreatePopup(eventData.HitCharacter.position)
             .Initialize(eventData.DamageAmt.ToString(), eventData.StatusEffect.Icon)
             .SetScale(0.9f).AnimatePopup(0, 0.7f, 1.2f);
+        });
+    }
+
+    void AddPopupCreationToQueue(CharacterModel model, Action action){
+        if(!_dmgPopupQueue.ContainsKey(model)) _dmgPopupQueue[model] = new Queue<Action>();
+        _dmgPopupQueue[model].Enqueue(action);
+        ExecuteDmgPopups();
+    }
+    async void ExecuteDmgPopups(){
+        if(_queueRunning) return;
+        _queueRunning = true;
+        await Task.Yield();
+        List<Task> tasks = new List<Task>();
+        foreach(var kvp in _dmgPopupQueue){
+            tasks.Add(Execute(kvp.Value));
+        }
+        await Task.WhenAll(tasks);
+        _queueRunning = false;
+    }
+    async Task Execute(Queue<Action> actions){
+        while(actions.Count > 0){
+            actions.Dequeue().Invoke();
+            await Task.Delay(50);
+        }
     }
 
     PopupPropertyManager CreatePopup(Vector2 position){

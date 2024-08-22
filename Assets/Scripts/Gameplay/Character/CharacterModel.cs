@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using LlwnrEventBus;
 
-public abstract class CharacterModel : MonoBehaviour
+public abstract class CharacterModel : MonoBehaviour, IDamagable
 {
-    [SerializeField]protected CharacterStatsData _characterData;
+    [SerializeField]protected CharacterData _characterData;
     [SerializeField]protected StatusEffectManager _statusEffectManager;
+    
     //For Health Management
     private HealthManager _healthManager;
 
@@ -29,9 +30,19 @@ public abstract class CharacterModel : MonoBehaviour
     public List<SkillAction> GetSkills(){
         return _characterData.MySkills;
     }
-    public bool DealDamage(float dmgAmt){
+    public bool DealSkillDamage(float dmgAmt, bool dealLinkedDmg = true){
         _healthManager.DealDamage(dmgAmt);
-
+        RaiseSkillDmgTakenEvent(dmgAmt);
+        DeathOnEmptyHealth();
+        
+        return true;//Returns true if damage is dealt successfully to this character
+    }
+    public void DealStatusEffectDamage(StatusEffect statusEffect, float dmgAmt){
+        _healthManager.DealDamage(dmgAmt);
+        RaiseStatusEffectDmgTakenEvent(statusEffect, dmgAmt);
+        DeathOnEmptyHealth();
+    }
+    protected void RaiseSkillDmgTakenEvent(float dmgAmt){
         EventBus<OnSkillDamageTakenEvent>.Raise(new OnSkillDamageTakenEvent{
             HitCharacter = transform,
             CharacterModel = this,
@@ -39,16 +50,8 @@ public abstract class CharacterModel : MonoBehaviour
             CurrentHealth = _healthManager.CurrentHealth,
             MaxHealth = _healthManager.MaxHealth,
         });
-        //MANAGING WHEN A CHARACTER DIES
-        if(_healthManager.CurrentHealth <= 0){
-            gameObject.SetActive(false);
-            NotifyDeath();
-        }
-        return true;//Returns true if damage is dealt successfully to this character
     }
-    public void DealStatusEffectDamage(StatusEffect statusEffect, float dmgAmt){
-        _healthManager.DealDamage(dmgAmt);
-
+    protected void RaiseStatusEffectDmgTakenEvent(StatusEffect statusEffect, float dmgAmt){
         EventBus<OnStatusEffectDamageTakenEvent>.Raise(new OnStatusEffectDamageTakenEvent{
             HitCharacter = transform,
             CharacterModel = this,
@@ -57,7 +60,9 @@ public abstract class CharacterModel : MonoBehaviour
             MaxHealth = _healthManager.MaxHealth,
             StatusEffect = statusEffect,
         });
-        //MANAGING WHEN A CHARACTER DIES
+    }
+    //MANAGING WHEN A CHARACTER DIES
+    protected void DeathOnEmptyHealth(){
         if(_healthManager.CurrentHealth <= 0){
             gameObject.SetActive(false);
             NotifyDeath();
@@ -73,26 +78,25 @@ public abstract class CharacterModel : MonoBehaviour
     }
 
     //STATUS EFFECT PART
-    public void InflictStatusEffect(StatusEffect statusEffect, int stacks){//Mostly to inflict SE when damage is not taken, like self buffs
+    public void InflictStatusEffect(StatusEffect statusEffect, int stacks){
         _statusEffectManager.InflictStatusEffect(statusEffect, stacks);
     }
     
     //DATA PART
     public float GetBaseDmgMod(){
-        return _characterData.AttackMultiplier;
+        return _characterData.CharacterStats.Attack;
     }
     public float GetFinalDmgMod(){
-        return StatsManager.GetFinalData(_characterData, _statusEffectManager).AttackMultiplier;
+        return StatsManager.GetFinalData(this).Attack;
     }
     public float GetFinalSpeed(){
-        return _characterData.Speed;
+        return StatsManager.GetFinalData(this).Speed;
     }
     public float GetHealth(){
         return _healthManager.CurrentHealth;
     }
-    public CharacterStatsData GetBaseStatsData(){
-        //NEVER MODIFY THIS DIRECTLY
-        return _characterData;
+    public CharacterStat GetBaseStatsData(){
+        return _characterData.CharacterStats;
     }
     public StatusEffectManager GetStatusEffectManager(){
         return _statusEffectManager;

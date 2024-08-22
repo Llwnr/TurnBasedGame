@@ -19,8 +19,9 @@ public class AnimationManager : MonoBehaviour
     public async Task PlayAnimation(string animState, Vector2 animPos){
         _skillAnimator.Play(animState);
         _skillAnimator.transform.position = animPos;
-        while(_skillAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.5f){
-            await Task.Yield();
+        
+        while(_skillAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.75f){
+            await Task.Delay(1);
         }
     }
 }
