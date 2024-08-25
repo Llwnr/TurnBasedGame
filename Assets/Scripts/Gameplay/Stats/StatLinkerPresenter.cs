@@ -12,10 +12,14 @@ public class StatLinkerPresenter : MonoBehaviour
 
     private void Start() {
         _linkButton.onClick.AddListener(StartLinking);
+        TargetManager.OnPlayerTargetChange += ShowLinks;
         TargetManager.OnPlayerTargetChange += TryAttachEndLink;
+        TargetManager.OnEmptyTargetClicked += HideLinks;
     }
     private void OnDestroy() {
+        TargetManager.OnPlayerTargetChange -= ShowLinks;
         TargetManager.OnPlayerTargetChange -= TryAttachEndLink;
+        TargetManager.OnEmptyTargetClicked -= HideLinks;
     }
 
     void StartLinking(){
@@ -24,12 +28,19 @@ public class StatLinkerPresenter : MonoBehaviour
     }
     //Will try to finish up the linking process if possible
     void TryAttachEndLink(Transform target){
+        if(!_linkingStarted) return;
         if(_linkingStarted && target != transform){
             _linkerView.SetLinkEnd(target);
             _linkerModel.AddLinkedPlayer(target.GetComponent<PlayerModel>());
             _linkingStarted = false;
-        }else{
-            Debug.Log("Invalid transform " + target);
         }
+    }
+    void ShowLinks(Transform target){
+        //Do nothing if the linking process is still going on
+        if(!target || target!=transform) return;
+        _linkerView.ShowLinks(transform, _linkerModel.GetLinkedPlayers());
+    }
+    void HideLinks(){
+        _linkerView.HideLinks();
     }
 }

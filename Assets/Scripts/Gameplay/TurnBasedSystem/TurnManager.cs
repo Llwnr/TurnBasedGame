@@ -20,14 +20,31 @@ public class TurnManager : MonoBehaviour
         LeanTween.reset();
     }
 
+    private float _gameTime = 0;
+    [SerializeField]private float _maxTurnTime;
+    bool _stopTime = false;
+
+
+    List<CharacterPresenter> _myCharacters = new List<CharacterPresenter>();
     Queue<CharacterPresenter> _turnQueue = new Queue<CharacterPresenter>();
     CharacterPresenter _currentPresenter;
     // Start is called before the first frame update
     IEnumerator Start()
     {
         yield return new WaitForEndOfFrame();
-        QueueTurn();
+        StartFirstTurn();
     }  
+    private void Update() {
+        UpdateGameTime();
+    }
+    void UpdateGameTime(){
+        if(_stopTime) return;
+        _gameTime += Time.deltaTime;
+        if(_gameTime > _maxTurnTime){
+            _gameTime = 0;
+            StartNewTurn();
+        }
+    }
 
     //Create a queue at start(Players turn first)
     void QueueTurn(){
@@ -51,8 +68,23 @@ public class TurnManager : MonoBehaviour
         _currentPresenter.OnCharacterTurnStart();
     }
 
-    public void SetNextGameTurn(){
+    void StartFirstTurn(){
         EventBus<OnTurnStart>.Raise(new OnTurnStart{});
+        _myCharacters = FindObjectsOfType<CharacterPresenter>().ToList();
         QueueTurn();
+    }
+    public void StartNewTurn(){
+        EventBus<OnTurnStart>.Raise(new OnTurnStart{});
+        _myCharacters = FindObjectsOfType<CharacterPresenter>().ToList();
+        QueueTurn();
+    }
+    public float GetGameTime(){
+        return _gameTime;
+    }
+    public float GetMaxTurnTime(){
+        return _maxTurnTime;
+    }
+    public void StopTime(bool value){
+        _stopTime = value;
     }
 }

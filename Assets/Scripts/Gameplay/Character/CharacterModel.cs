@@ -27,9 +27,6 @@ public abstract class CharacterModel : MonoBehaviour, IDamagable
     }
 
     //FOR SKILLS
-    public List<SkillAction> GetSkills(){
-        return _characterData.MySkills;
-    }
     public virtual bool DealSkillDamage(float dmgAmt, bool dealLinkedDmg = true){
         _healthManager.DealDamage(dmgAmt);
         RaiseSkillDmgTakenEvent(dmgAmt);
@@ -83,6 +80,9 @@ public abstract class CharacterModel : MonoBehaviour, IDamagable
     }
     
     //DATA PART
+    public List<SkillAction> GetSkills(){
+        return _characterData.MySkills;
+    }
     public float GetBaseDmgMod(){
         return _characterData.CharacterStats.Attack;
     }

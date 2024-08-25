@@ -12,35 +12,32 @@ public class CharacterSkillView : MonoBehaviour
     [SerializeField]private Button _skillBtnPrefab;
     [SerializeField]private TextMeshProUGUI _labelText;
     [SerializeField]private DescriptionBoxController _descriptionBox;
-    private CharacterPresenter _characterPresenter;
+    private PlayerPresenter _playerPresenter;
     private List<Button> _skillButtons = new List<Button>();
 
     //Set required references
-    public void InitializeView(CharacterPresenter myCharacterPresenter){
-        _characterPresenter = myCharacterPresenter;
+    public void InitializeView(PlayerPresenter myCharacterPresenter){
+        _playerPresenter = myCharacterPresenter;
+    }
+
+    public void SetLabel(string characterName){
+        _labelText.text = characterName;
     }
 
     //Create skill buttons based on the list of skills the character has
-    public void InstantiateSkillButtons(List<SkillAction> skills, CharacterModel skillOwner){
-        _labelText.text = skillOwner.name + ":";
+    public void InstantiateSkillButtons(List<SkillAction> skills){
         foreach(SkillAction skill in skills){
             Button newSkillBtn = Instantiate(_skillBtnPrefab, _container);
             newSkillBtn.image.sprite = skill.Icon;
-            SetSkill(newSkillBtn, skill, skillOwner);
+            SetSkill(newSkillBtn, skill);
             SetOnHoverDescriptionBox(newSkillBtn, skill);
             _skillButtons.Add(newSkillBtn);
         }
     }
 
     //Set skills to execute on the button
-    public void SetSkill(Button btn, SkillAction action, CharacterModel skillOwner){
-        btn.onClick.AddListener(() => {
-            CharacterModel target = TargetManager.SelectedEnemyTarget;
-            ActionManager.instance.AddAction(async () => {
-                await action.Execute(skillOwner, () => TargetManager.GetTargetOrAvailableTarget(target));
-            });
-            _characterPresenter.OnSkillUsed();
-        });
+    public void SetSkill(Button btn, SkillAction action){
+        btn.onClick.AddListener(() => _playerPresenter.ExecuteSkill(action));
     }
 
     //Display the description box on skill button hover

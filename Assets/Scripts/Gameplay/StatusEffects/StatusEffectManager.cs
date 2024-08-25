@@ -10,6 +10,7 @@ using UnityEngine;
 public class StatusEffectManager : MonoBehaviour
 {
     Dictionary<StatusEffectTrigger, List<StatusEffectData>> _statusEffectsDatas = new Dictionary<StatusEffectTrigger, List<StatusEffectData>>();
+    List<StatusEffectData> _statBuffDebuffDatas = new List<StatusEffectData>();
     CharacterModel _characterModel;
     //Manage various status effects execution causes
     //For example, when a turn starts, execute the _statusEffects related to it
@@ -48,11 +49,14 @@ public class StatusEffectManager : MonoBehaviour
                 StatusEffect = statusEffect,
             };
             _statusEffectsDatas[statusEffect.TriggerType].Add(myStatusEffect);
+            if(myStatusEffect.StatusEffect is StatsModificationEffect) _statBuffDebuffDatas.Add(myStatusEffect);
         }
         //If AnomalyType effect then add stacks
         if(myStatusEffect.StatusEffect is AnomalyEffect)  myStatusEffect.AddStacks(stacks);
         //If StatModifier type then just reset the duration of stacks
-        if(myStatusEffect.StatusEffect is StatsModificationEffect)  myStatusEffect.SetStacks(stacks); 
+        if(myStatusEffect.StatusEffect is StatsModificationEffect){
+            myStatusEffect.SetStacks(stacks); 
+        }
         //Notify whether the status effect was added or updated
         if(dataExists){
             OnStatusEffectUpdated?.Invoke(myStatusEffect);
@@ -88,6 +92,9 @@ public class StatusEffectManager : MonoBehaviour
         List<StatusEffectData> statusEffectDatas = _statusEffectsDatas[trigger];
         for(int i=0; i<statusEffectDatas.Count; i++){
             StatusEffectData statusEffectData = statusEffectDatas[i];
+            if(statusEffectData.StatusEffect is StatsModificationEffect){
+                _statBuffDebuffDatas.Remove(statusEffectData);
+            }
             if(statusEffectData.StatusEffect.GetType() == statusEffect.GetType()){
                 statusEffectDatas.Remove(statusEffectData);
                 i--;
@@ -114,12 +121,7 @@ public class StatusEffectManager : MonoBehaviour
         return statusEffects;
     }
     public List<StatusEffectData> GetStatModifiers(){
-        List<StatusEffectData> statusEffects = GetAllStatusEffects();
-        List<StatusEffectData> statModEffects = new List<StatusEffectData>();
-        foreach(var data in statusEffects){
-            if(data.StatusEffect is StatsModificationEffect) statModEffects.Add(data);
-        }
-        return statModEffects;
+        return _statBuffDebuffDatas;
     }
     public StatusEffectData GetStatusEffectData(StatusEffect statusEffect){
         foreach(StatusEffectData data in GetAllStatusEffects()){
