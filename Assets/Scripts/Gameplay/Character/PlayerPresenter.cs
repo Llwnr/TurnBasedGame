@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerPresenter : CharacterPresenter {
@@ -33,8 +34,8 @@ public class PlayerPresenter : CharacterPresenter {
         CharacterModel target = TargetManager.SelectedEnemyTarget;
         TurnManager.instance.StopTime(true);
         await skillAction.Execute(_characterModel, () => TargetManager.GetTargetOrAvailableTarget(target));
+        await Task.Delay(300);
         OnSkillUsed();
-        TurnManager.instance.StopTime(false);
         _isExecuting = false;
     }
 

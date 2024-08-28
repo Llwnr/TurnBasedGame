@@ -11,19 +11,45 @@ public abstract class CharacterModel : MonoBehaviour, IDamagable
     
     //For Health Management
     private HealthManager _healthManager;
+    private ActionPointsManager _actionPointsManager;
 
     protected virtual void Awake() {
+        InitializeSprite();
         InitializeHealthComponent();
+        InitializeActionPointsComponent();
     }
 
+    void InitializeSprite(){
+        GetComponent<SpriteRenderer>().sprite = GetSprite();
+    }
     void InitializeHealthComponent(){
         _healthManager = new HealthManager(_characterData.MaxHealth);
+    }
+    void InitializeActionPointsComponent(){
+        _actionPointsManager = new ActionPointsManager(_characterData.ActionThreshold, this);
     }
     public void SubscribeToHealthChange(Action<float, float> action){
         _healthManager.OnHealthChanged += action;
     }
     public void UnsubscribeToHealthChange(Action<float, float> action){
         _healthManager.OnHealthChanged -= action;
+    }
+    public void SubscribeToActionPointChange(Action<float, float, CharacterModel> action){
+        _actionPointsManager.OnActionPointsChanged += action;
+    }
+    public void UnsubscribeToActionPointChange(Action<float, float, CharacterModel> action){
+        _actionPointsManager.OnActionPointsChanged -= action;
+    }
+
+    //FOR TIME RELATED ACTIONS
+    public void IncreaseActionPoints() => _actionPointsManager.IncreaseActionPoints(GetFinalSpeed());
+
+    //To know if the player can act
+    public bool CanAct(){
+        return _actionPointsManager.HasAp();
+    }
+    public void SkillUsed(){
+        _actionPointsManager.ReduceAp();
     }
 
     //FOR SKILLS
@@ -82,6 +108,9 @@ public abstract class CharacterModel : MonoBehaviour, IDamagable
     //DATA PART
     public List<SkillAction> GetSkills(){
         return _characterData.MySkills;
+    }
+    public Sprite GetSprite(){
+        return _characterData.Image;
     }
     public float GetBaseDmgMod(){
         return _characterData.CharacterStats.Attack;

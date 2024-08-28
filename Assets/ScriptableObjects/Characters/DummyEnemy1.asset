@@ -14,10 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: 
   Description: 
+  Image: {fileID: 21300000, guid: e662fa01da336f64d9d592d871ab83a0, type: 3}
   MaxHealth: 250
   CharacterStats:
     Attack: 1
     Defense: 1
     Speed: 1
+  ActionThreshold: 100
   MySkills:
   - {fileID: 11400000, guid: b9a83265bbcd7ea419403023307cbe75, type: 2}

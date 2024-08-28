@@ -38,6 +38,7 @@ public class CharacterSkillView : MonoBehaviour
     //Set skills to execute on the button
     public void SetSkill(Button btn, SkillAction action){
         btn.onClick.AddListener(() => _playerPresenter.ExecuteSkill(action));
+        btn.onClick.AddListener(() => SetSkillsVisible(false));
     }
 
     //Display the description box on skill button hover

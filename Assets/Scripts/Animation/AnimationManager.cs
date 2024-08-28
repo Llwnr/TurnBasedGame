@@ -16,11 +16,11 @@ public class AnimationManager : MonoBehaviour
 
     [SerializeField]private Animator _skillAnimator;
 
-    public async Task PlayAnimation(string animState, Vector2 animPos){
-        _skillAnimator.Play(animState);
+    public async Task PlayAnimation(string animState, Vector2 animPos, float animHitTime){
         _skillAnimator.transform.position = animPos;
+        _skillAnimator.Play(animState, -1, 0f);
         
-        while(_skillAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 0.75f){
+        while(_skillAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < animHitTime){
             await Task.Delay(1);
         }
     }

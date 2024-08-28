@@ -23,3 +23,4 @@ MonoBehaviour:
   Description: Deals /dmg/ dmg to a single enemy.
   SkillDmgMultiplier: 15
   SkillAnim: {fileID: 7400000, guid: e253be67dd1af02499b1764f9d777ef3, type: 2}
+  AnimHitTime: 0.57

@@ -14,8 +14,16 @@ public abstract class CharacterPresenter : MonoBehaviour
     public abstract void OnCharacterTurnEnd();
 
     public void OnSkillUsed(){
+        _characterModel.SkillUsed();
         OnCharacterTurnEnd();
-        TurnManager.instance.NextCharactersTurn();
     }
-    public float GetFinalSpeed() =>  _characterModel.GetFinalSpeed();
+    public bool CanAct(){
+        return _characterModel.CanAct();
+    }
+    public void UpdateTime(){
+        _characterModel.IncreaseActionPoints();
+    }
+    public float GetCurrentSpeed(){
+        return _characterModel.GetFinalSpeed();
+    }
 }

@@ -7,10 +7,14 @@ public class CharacterData : ScriptableObject {
     [Header("Basic Information")]
     public string Name;
     public string Description;
+    public Sprite Image;
 
     [Header("Core Stats")]
     public float MaxHealth;
     public CharacterStat CharacterStats;
+
+    [Header("Resource Stats")]
+    public float ActionThreshold;
 
     [Header("Skills")]
     public List<SkillAction> MySkills;

@@ -39,6 +39,7 @@ public class StatLinkerPresenter : MonoBehaviour
         //Do nothing if the linking process is still going on
         if(!target || target!=transform) return;
         _linkerView.ShowLinks(transform, _linkerModel.GetLinkedPlayers());
+        Debug.Log("Showing links for " + target.name);
     }
     void HideLinks(){
         _linkerView.HideLinks();

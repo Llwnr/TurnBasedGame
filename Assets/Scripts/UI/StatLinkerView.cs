@@ -31,6 +31,8 @@ public class StatLinkerView : MonoBehaviour
     public void ShowLinks(Transform mainTarget, List<PlayerModel> playerLinks){
         _lineRenderer.enabled = true;
         _lineRenderer.positionCount = Math.Max(2,playerLinks.Count*2);
+        _lineRenderer.SetPosition(0,Vector2.zero);
+        _lineRenderer.SetPosition(1,Vector2.zero);
         for(int i=0; i<playerLinks.Count*2; i+=2){
             Transform linkedTarget = playerLinks[i/2].transform;
 

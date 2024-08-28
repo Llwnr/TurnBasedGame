@@ -13,6 +13,7 @@ public abstract class SkillAction : ScriptableObject
     public string Description; // Description of the skill
     public float SkillDmgMultiplier; // Damage multiplier for the skill
     public AnimationClip SkillAnim; // Animation clip for the skill
+    public float AnimHitTime; //The time of the animation where dmg should be dealt
 
     // Executes the skill action
     public async Task Execute(CharacterModel skillUser, Func<CharacterModel> targetFinder){
@@ -21,7 +22,6 @@ public abstract class SkillAction : ScriptableObject
 
         Vector2 origPos = skillUser.transform.position;
         CharacterModel target = targetFinder.Invoke();
-        await Task.Delay(300);
 
         // Move to the target
         await MoveToTarget(skillUser.transform, target.transform);
@@ -32,7 +32,6 @@ public abstract class SkillAction : ScriptableObject
         // Execute the skill based on whether it's AoE or single target
         if(!IsAoe){
             ExecuteSkill(skillUser, target);
-            InflictSelfEffects(skillUser);
         }else{
             // AoE skill execution
             if(target is PlayerModel){
@@ -45,6 +44,9 @@ public abstract class SkillAction : ScriptableObject
                 }
             }
         }
+        InflictSelfEffects(skillUser);
+
+        await Task.Delay(300);
 
         // Return to the original position
         skillUser.transform.position = origPos;
@@ -64,7 +66,7 @@ public abstract class SkillAction : ScriptableObject
     // Plays the skill animation
     async Task PlaySkillAnimation(Vector2 position){
         if(AnimationManager.instance == null) return;
-        await AnimationManager.instance.PlayAnimation(SkillAnim.name, position);
+        await AnimationManager.instance.PlayAnimation(SkillAnim.name, position, AnimHitTime);
     }
 
     // Inflicts status effects on the skill user
